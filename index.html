@@ -1,2249 +1,1194 @@
+html
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>R15 NIGHT — Loja Oficial</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="theme-color" content="#16a34a"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Fiado"/>
+<title>Fiado App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { sans: ['Plus Jakarta Sans','sans-serif'], mono: ['JetBrains Mono','monospace'] },
+      colors: {
+        brand: { 50:'#f0fdf4',100:'#dcfce7',200:'#bbf7d0',300:'#86efac',400:'#4ade80',500:'#22c55e',600:'#16a34a',700:'#15803d',800:'#166534',900:'#14532d' }
+      }
+    }
+  }
+}
+</script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin></script>
 <style>
-  :root {
-    --bg: #050508;
-    --bg2: #0a0a10;
-    --bg3: #0f0f18;
-    --neon: #00c8ff;
-    --neon2: #ff4400;
-    --gold: #f5c400;
-    --text: #e8eaf6;
-    --muted: #7a7d9c;
-    --border: rgba(0,200,255,0.15);
-    --card: rgba(10,12,25,0.9);
-    --red: #ff1e1e;
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 16px;
-    min-height: 100vh;
-    overflow-x: hidden;
-    cursor: default;
-  }
-
-  /* CANVAS RAIN */
-  #rain-canvas {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    opacity: 0.18;
-  }
-
-  /* SCANLINES */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,200,255,0.015) 2px,
-      rgba(0,200,255,0.015) 4px
-    );
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  /* NAV */
-  nav {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(5,5,8,0.92);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-    padding: 0 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 64px;
-  }
-
-  .nav-logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    letter-spacing: 3px;
-    color: var(--neon);
-    text-shadow: 0 0 20px var(--neon), 0 0 40px rgba(0,200,255,0.3);
-    text-decoration: none;
-  }
-
-  .nav-logo span { color: var(--neon2); }
-
-  .nav-links { display: flex; gap: 32px; align-items: center; }
-
-  .nav-links a {
-    color: var(--muted);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 13px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    transition: color .2s;
-  }
-
-  .nav-links a:hover { color: var(--neon); }
-
-  .nav-right { display: flex; gap: 16px; align-items: center; }
-
-  .btn-cart {
-    position: relative;
-    background: transparent;
-    border: 1px solid var(--neon);
-    color: var(--neon);
-    padding: 8px 20px;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: all .2s;
-    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
-  }
-
-  .btn-cart:hover {
-    background: var(--neon);
-    color: var(--bg);
-    box-shadow: 0 0 24px var(--neon);
-  }
-
-  .cart-count {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: var(--neon2);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .btn-seller {
-    background: transparent;
-    border: 1px solid var(--neon2);
-    color: var(--neon2);
-    padding: 8px 16px;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    cursor: pointer;
-    transition: all .2s;
-    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
-  }
-
-  .btn-seller:hover {
-    background: var(--neon2);
-    color: #fff;
-    box-shadow: 0 0 24px var(--neon2);
-  }
-
-  /* HERO */
-  .hero {
-    position: relative;
-    z-index: 2;
-    height: 520px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    text-align: center;
-    overflow: hidden;
-  }
-
-  .hero-bg {
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 80% 60% at 50% 100%, rgba(0,200,255,0.08) 0%, transparent 70%),
-      radial-gradient(ellipse 40% 30% at 30% 50%, rgba(255,68,0,0.06) 0%, transparent 60%),
-      linear-gradient(180deg, #050508 0%, #07070f 50%, #0a0316 100%);
-  }
-
-  .hero-road {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 600px;
-    height: 200px;
-    background: linear-gradient(180deg, transparent 0%, rgba(0,200,255,0.04) 100%);
-    clip-path: polygon(35% 0, 65% 0, 100% 100%, 0 100%);
-  }
-
-  .hero-road::before {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 20%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 80%;
-    background: repeating-linear-gradient(
-      180deg,
-      var(--neon) 0, var(--neon) 20px,
-      transparent 20px, transparent 40px
-    );
-    opacity: 0.4;
-  }
-
-  .hero-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(70px, 10vw, 130px);
-    letter-spacing: 6px;
-    line-height: 0.9;
-    position: relative;
-    z-index: 2;
-  }
-
-  .hero-title .line1 { color: #fff; }
-  .hero-title .line2 {
-    color: var(--neon);
-    text-shadow: 0 0 40px var(--neon), 0 0 80px rgba(0,200,255,0.4);
-  }
-  .hero-title .line3 { color: var(--neon2); font-size: 60%; letter-spacing: 20px; }
-
-  .hero-sub {
-    margin-top: 20px;
-    font-size: 15px;
-    letter-spacing: 4px;
-    color: var(--muted);
-    font-family: 'Share Tech Mono', monospace;
-    position: relative;
-    z-index: 2;
-  }
-
-  .hero-sub span { color: var(--neon); }
-
-  .hero-cta {
-    margin-top: 36px;
-    display: flex;
-    gap: 16px;
-    position: relative;
-    z-index: 2;
-  }
-
-  .btn-primary {
-    background: var(--neon);
-    color: var(--bg);
-    border: none;
-    padding: 14px 36px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px;
-    letter-spacing: 3px;
-    cursor: pointer;
-    clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
-    transition: all .2s;
-    text-decoration: none;
-    display: inline-block;
-  }
-
-  .btn-primary:hover {
-    box-shadow: 0 0 32px var(--neon), 0 0 60px rgba(0,200,255,0.3);
-    transform: translateY(-2px);
-  }
-
-  /* SPEED LINES */
-  .speed-line {
-    position: absolute;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--neon), transparent);
-    opacity: 0;
-    animation: speedLine 3s ease-in-out infinite;
-  }
-
-  @keyframes speedLine {
-    0% { opacity: 0; transform: scaleX(0) translateX(-100%); }
-    20% { opacity: 0.5; }
-    80% { opacity: 0.3; }
-    100% { opacity: 0; transform: scaleX(1) translateX(100%); }
-  }
-
-  /* STATS BAR */
-  .stats-bar {
-    position: relative;
-    z-index: 2;
-    background: rgba(0,200,255,0.06);
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    padding: 20px 40px;
-    display: flex;
-    justify-content: center;
-    gap: 60px;
-  }
-
-  .stat { text-align: center; }
-
-  .stat-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 32px;
-    color: var(--neon);
-    text-shadow: 0 0 12px var(--neon);
-    display: block;
-  }
-
-  .stat-label {
-    font-size: 11px;
-    letter-spacing: 3px;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-
-  /* SECTION */
-  section {
-    position: relative;
-    z-index: 2;
-    padding: 60px 40px;
-    max-width: 1300px;
-    margin: 0 auto;
-  }
-
-  .section-header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 40px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 20px;
-  }
-
-  .section-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 48px;
-    letter-spacing: 4px;
-    color: #fff;
-  }
-
-  .section-title span { color: var(--neon); }
-
-  .section-tag {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 12px;
-    color: var(--muted);
-    letter-spacing: 2px;
-  }
-
-  /* PRODUCT GRID */
-  .product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px;
-  }
-
-  .product-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    position: relative;
-    overflow: hidden;
-    transition: all .3s;
-    cursor: pointer;
-    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
-  }
-
-  .product-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(0,200,255,0.04) 0%, transparent 60%);
-    z-index: 0;
-  }
-
-  .product-card:hover {
-    border-color: rgba(0,200,255,0.5);
-    box-shadow: 0 0 30px rgba(0,200,255,0.12), inset 0 0 30px rgba(0,200,255,0.04);
-    transform: translateY(-4px);
-  }
-
-  .product-img-wrap {
-    position: relative;
-    height: 200px;
-    background: var(--bg3);
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .product-img-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform .4s;
-    filter: brightness(0.9) saturate(1.2);
-  }
-
-  .product-card:hover .product-img-wrap img { transform: scale(1.06); }
-
-  .product-no-img {
-    font-size: 60px;
-    opacity: 0.3;
-  }
-
-  .product-badge {
-    position: absolute;
-    top: 12px;
-    left: 0;
-    background: var(--neon2);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    padding: 4px 12px;
-    font-family: 'Rajdhani', sans-serif;
-    clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
-  }
-
-  .product-body {
-    padding: 20px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .product-category {
-    font-size: 10px;
-    letter-spacing: 3px;
-    color: var(--neon);
-    text-transform: uppercase;
-    margin-bottom: 6px;
-    font-family: 'Share Tech Mono', monospace;
-  }
-
-  .product-name {
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: #fff;
-    margin-bottom: 8px;
-    line-height: 1.2;
-  }
-
-  .product-desc {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.5;
-    margin-bottom: 16px;
-  }
-
-  .product-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .product-price {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    color: var(--gold);
-    text-shadow: 0 0 10px rgba(245,196,0,0.3);
-    letter-spacing: 1px;
-  }
-
-  .product-price small {
-    font-size: 14px;
-    color: var(--muted);
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 500;
-  }
-
-  .btn-add-cart {
-    background: transparent;
-    border: 1px solid var(--neon);
-    color: var(--neon);
-    padding: 8px 20px;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    cursor: pointer;
-    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
-    transition: all .2s;
-  }
-
-  .btn-add-cart:hover {
-    background: var(--neon);
-    color: var(--bg);
-    box-shadow: 0 0 16px var(--neon);
-  }
-
-  /* EMPTY STATE */
-  .empty-state {
-    grid-column: 1/-1;
-    text-align: center;
-    padding: 80px 20px;
-    color: var(--muted);
-  }
-
-  .empty-state .icon { font-size: 60px; margin-bottom: 16px; display: block; opacity: 0.4; }
-  .empty-state h3 { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 3px; margin-bottom: 8px; }
-  .empty-state p { font-size: 14px; letter-spacing: 1px; }
-
-  /* FILTER BAR */
-  .filter-bar {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 32px;
-    flex-wrap: wrap;
-  }
-
-  .filter-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 7px 18px;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    cursor: pointer;
-    transition: all .2s;
-    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
-  }
-
-  .filter-btn:hover, .filter-btn.active {
-    border-color: var(--neon);
-    color: var(--neon);
-    background: rgba(0,200,255,0.06);
-  }
-
-  /* SEARCH */
-  .search-bar {
-    position: relative;
-    margin-bottom: 32px;
-  }
-
-  .search-bar input {
-    width: 100%;
-    max-width: 400px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 12px 20px 12px 44px;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 15px;
-    outline: none;
-    transition: border-color .2s;
-    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
-  }
-
-  .search-bar input:focus { border-color: var(--neon); }
-  .search-bar input::placeholder { color: var(--muted); }
-
-  .search-icon {
-    position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--muted);
-    font-size: 16px;
-  }
-
-  /* CART SIDEBAR */
-  .cart-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 200;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .3s;
-  }
-
-  .cart-overlay.open { opacity: 1; pointer-events: all; }
-
-  .cart-sidebar {
-    position: fixed;
-    right: -440px;
-    top: 0;
-    bottom: 0;
-    width: 420px;
-    background: var(--bg2);
-    border-left: 1px solid var(--border);
-    z-index: 201;
-    transition: right .3s cubic-bezier(.4,0,.2,1);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .cart-sidebar.open { right: 0; }
-
-  .cart-header {
-    padding: 24px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(0,200,255,0.04);
-  }
-
-  .cart-header h2 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    letter-spacing: 3px;
-    color: var(--neon);
-  }
-
-  .btn-close {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    width: 36px;
-    height: 36px;
-    cursor: pointer;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all .2s;
-  }
-
-  .btn-close:hover { border-color: var(--red); color: var(--red); }
-
-  .cart-items {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-  }
-
-  .cart-items::-webkit-scrollbar { width: 4px; }
-  .cart-items::-webkit-scrollbar-track { background: transparent; }
-  .cart-items::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  .cart-item {
-    display: flex;
-    gap: 14px;
-    padding: 14px;
-    border: 1px solid var(--border);
-    margin-bottom: 10px;
-    background: rgba(255,255,255,0.02);
-    align-items: center;
-  }
-
-  .cart-item-img {
-    width: 70px;
-    height: 60px;
-    object-fit: cover;
-    background: var(--bg3);
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    color: var(--muted);
-    overflow: hidden;
-  }
-
-  .cart-item-img img { width: 100%; height: 100%; object-fit: cover; }
-
-  .cart-item-info { flex: 1; }
-
-  .cart-item-name {
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-  }
-
-  .cart-item-price {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 14px;
-    color: var(--gold);
-  }
-
-  .cart-item-qty {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 8px;
-  }
-
-  .qty-btn {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    color: var(--text);
-    width: 26px;
-    height: 26px;
-    cursor: pointer;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all .2s;
-  }
-
-  .qty-btn:hover { border-color: var(--neon); color: var(--neon); }
-
-  .qty-num { font-size: 14px; font-weight: 700; min-width: 20px; text-align: center; }
-
-  .btn-remove-cart {
-    background: transparent;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 16px;
-    transition: color .2s;
-    padding: 4px;
-  }
-
-  .btn-remove-cart:hover { color: var(--red); }
-
-  .cart-footer {
-    padding: 20px 24px;
-    border-top: 1px solid var(--border);
-    background: rgba(0,200,255,0.03);
-  }
-
-  .cart-total-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-  }
-
-  .cart-total-label {
-    font-size: 13px;
-    letter-spacing: 2px;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-
-  .cart-total-value {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 32px;
-    color: var(--gold);
-    text-shadow: 0 0 12px rgba(245,196,0,0.4);
-  }
-
-  .btn-checkout {
-    width: 100%;
-    background: var(--neon);
-    color: var(--bg);
-    border: none;
-    padding: 16px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 4px;
-    cursor: pointer;
-    clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
-    transition: all .2s;
-  }
-
-  .btn-checkout:hover {
-    box-shadow: 0 0 32px var(--neon);
-    transform: translateY(-2px);
-  }
-
-  .btn-checkout:disabled {
-    background: var(--bg3);
-    color: var(--muted);
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
-  }
-
-  /* MODAL BASE */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 300;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-
-  .modal-overlay.open { display: flex; }
-
-  .modal {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    width: 100%;
-    max-width: 540px;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-    clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
-  }
-
-  .modal::-webkit-scrollbar { width: 4px; }
-  .modal::-webkit-scrollbar-thumb { background: var(--border); }
-
-  .modal-header {
-    padding: 28px 28px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(0,200,255,0.04);
-  }
-
-  .modal-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 32px;
-    letter-spacing: 3px;
-    color: var(--neon);
-  }
-
-  .modal-body { padding: 28px; }
-
-  /* FORM STYLES */
-  .form-group { margin-bottom: 20px; }
-
-  .form-label {
-    display: block;
-    font-size: 11px;
-    letter-spacing: 3px;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    font-family: 'Share Tech Mono', monospace;
-  }
-
-  .form-input, .form-select, .form-textarea {
-    width: 100%;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 12px 16px;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 16px;
-    outline: none;
-    transition: border-color .2s;
-  }
-
-  .form-input:focus, .form-select:focus, .form-textarea:focus {
-    border-color: var(--neon);
-    background: rgba(0,200,255,0.04);
-  }
-
-  .form-input::placeholder, .form-textarea::placeholder { color: var(--muted); }
-
-  .form-select { cursor: pointer; }
-  .form-select option { background: #0f0f1a; color: var(--text); }
-
-  .form-textarea { resize: vertical; min-height: 90px; }
-
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-
-  .form-error {
-    font-size: 12px;
-    color: var(--red);
-    margin-top: 6px;
-    letter-spacing: 1px;
-  }
-
-  /* SELLER PANEL */
-  .seller-products {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-height: 300px;
-    overflow-y: auto;
-    margin-top: 20px;
-  }
-
-  .seller-products::-webkit-scrollbar { width: 4px; }
-  .seller-products::-webkit-scrollbar-thumb { background: var(--border); }
-
-  .seller-product-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    border: 1px solid var(--border);
-    background: rgba(255,255,255,0.02);
-  }
-
-  .seller-product-row img, .seller-product-img-placeholder {
-    width: 50px;
-    height: 44px;
-    object-fit: cover;
-    background: var(--bg3);
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    color: var(--muted);
-  }
-
-  .seller-product-info { flex: 1; }
-
-  .seller-product-name {
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 1px;
-  }
-
-  .seller-product-meta {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 2px;
-    font-family: 'Share Tech Mono', monospace;
-  }
-
-  .btn-danger {
-    background: transparent;
-    border: 1px solid var(--red);
-    color: var(--red);
-    padding: 6px 14px;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all .2s;
-    white-space: nowrap;
-  }
-
-  .btn-danger:hover { background: var(--red); color: #fff; }
-
-  .btn-edit {
-    background: transparent;
-    border: 1px solid var(--gold);
-    color: var(--gold);
-    padding: 6px 14px;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all .2s;
-    white-space: nowrap;
-  }
-
-  .btn-edit:hover { background: var(--gold); color: var(--bg); }
-
-  /* TABS */
-  .tabs { display: flex; gap: 0; margin-bottom: 24px; border-bottom: 1px solid var(--border); }
-
-  .tab-btn {
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid transparent;
-    color: var(--muted);
-    padding: 12px 24px;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: all .2s;
-    margin-bottom: -1px;
-  }
-
-  .tab-btn.active {
-    color: var(--neon);
-    border-bottom-color: var(--neon);
-  }
-
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-
-  /* CHECKOUT STEPS */
-  .checkout-steps {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 28px;
-  }
-
-  .checkout-step {
-    flex: 1;
-    text-align: center;
-    padding: 10px;
-    border: 1px solid var(--border);
-    font-size: 12px;
-    letter-spacing: 2px;
-    color: var(--muted);
-    font-family: 'Share Tech Mono', monospace;
-    transition: all .3s;
-  }
-
-  .checkout-step.active {
-    border-color: var(--neon);
-    color: var(--neon);
-    background: rgba(0,200,255,0.06);
-  }
-
-  .checkout-step.done {
-    border-color: rgba(0,200,255,0.3);
-    color: rgba(0,200,255,0.5);
-    background: rgba(0,200,255,0.03);
-  }
-
-  /* ORDER SUMMARY */
-  .order-items { margin-bottom: 20px; }
-
-  .order-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 14px;
-  }
-
-  .order-item-name { color: var(--text); }
-  .order-item-price { color: var(--gold); font-family: 'Share Tech Mono', monospace; }
-
-  .order-total {
-    display: flex;
-    justify-content: space-between;
-    padding: 16px 0;
-    border-top: 2px solid var(--neon);
-    margin-top: 8px;
-  }
-
-  .order-total-label {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 2px;
-  }
-
-  .order-total-price {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    color: var(--gold);
-    text-shadow: 0 0 10px rgba(245,196,0,0.3);
-  }
-
-  /* PIX */
-  .pix-box {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    padding: 24px;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-
-  .pix-code {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 13px;
-    color: var(--neon);
-    word-break: break-all;
-    margin: 16px 0;
-    padding: 12px;
-    background: rgba(0,200,255,0.05);
-    border: 1px solid rgba(0,200,255,0.2);
-    letter-spacing: 2px;
-  }
-
-  .pix-label {
-    font-size: 11px;
-    letter-spacing: 3px;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-
-  .qr-placeholder {
-    width: 140px;
-    height: 140px;
-    background: #fff;
-    margin: 16px auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .qr-inner {
-    width: 120px;
-    height: 120px;
-    background-image:
-      repeating-linear-gradient(0deg, #000 0, #000 8px, transparent 8px, transparent 12px),
-      repeating-linear-gradient(90deg, #000 0, #000 8px, transparent 8px, transparent 12px);
-    background-size: 12px 12px;
-    opacity: 0.9;
-  }
-
-  /* SUCCESS STATE */
-  .success-state {
-    text-align: center;
-    padding: 40px 20px;
-  }
-
-  .success-icon {
-    font-size: 60px;
-    display: block;
-    margin-bottom: 16px;
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-  }
-
-  .success-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 40px;
-    letter-spacing: 4px;
-    color: var(--neon);
-    text-shadow: 0 0 20px var(--neon);
-    margin-bottom: 12px;
-  }
-
-  .success-sub { font-size: 14px; color: var(--muted); letter-spacing: 1px; }
-
-  .order-id {
-    margin-top: 20px;
-    padding: 12px;
-    background: rgba(0,200,255,0.05);
-    border: 1px solid var(--border);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 14px;
-    color: var(--gold);
-    letter-spacing: 2px;
-  }
-
-  /* LOGIN */
-  .login-logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 4px;
-    color: var(--neon2);
-    text-align: center;
-    margin-bottom: 24px;
-    text-shadow: 0 0 16px var(--neon2);
-  }
-
-  /* FOOTER */
-  footer {
-    position: relative;
-    z-index: 2;
-    border-top: 1px solid var(--border);
-    padding: 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(0,200,255,0.02);
-    flex-wrap: wrap;
-    gap: 20px;
-  }
-
-  .footer-logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 24px;
-    letter-spacing: 4px;
-    color: var(--neon);
-    text-shadow: 0 0 12px var(--neon);
-  }
-
-  .footer-logo span { color: var(--neon2); }
-
-  .footer-text { font-size: 12px; color: var(--muted); letter-spacing: 2px; }
-
-  /* NOTIFICATION */
-  .notification {
-    position: fixed;
-    top: 80px;
-    right: 24px;
-    z-index: 400;
-    background: var(--bg2);
-    border-left: 3px solid var(--neon);
-    padding: 14px 20px;
-    min-width: 260px;
-    display: none;
-    animation: slideIn .3s ease-out;
-    box-shadow: 0 0 24px rgba(0,200,255,0.2);
-  }
-
-  .notification.error { border-left-color: var(--red); }
-  .notification.success { border-left-color: #00ff88; }
-  .notification.show { display: block; }
-
-  @keyframes slideIn {
-    from { transform: translateX(120%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-  }
-
-  .notif-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 700;
-    font-size: 15px;
-    letter-spacing: 1px;
-    color: var(--text);
-  }
-
-  .notif-text { font-size: 13px; color: var(--muted); margin-top: 4px; }
-
-  /* IMAGE UPLOAD */
-  .img-upload-area {
-    border: 1px dashed var(--border);
-    padding: 24px;
-    text-align: center;
-    cursor: pointer;
-    transition: all .2s;
-  }
-
-  .img-upload-area:hover {
-    border-color: var(--neon);
-    background: rgba(0,200,255,0.04);
-  }
-
-  .img-preview {
-    width: 100%;
-    height: 140px;
-    object-fit: contain;
-    margin-top: 12px;
-    display: none;
-  }
-
-  .img-url-input { display: none; }
-
-  /* PAYMENT OPTIONS */
-  .payment-options { display: flex; gap: 12px; margin-bottom: 20px; }
-
-  .payment-opt {
-    flex: 1;
-    border: 1px solid var(--border);
-    padding: 14px;
-    text-align: center;
-    cursor: pointer;
-    transition: all .2s;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--muted);
-    letter-spacing: 1px;
-  }
-
-  .payment-opt.selected {
-    border-color: var(--neon);
-    color: var(--neon);
-    background: rgba(0,200,255,0.06);
-  }
-
-  .payment-opt .pay-icon { font-size: 24px; display: block; margin-bottom: 8px; }
-
-  /* MOBILE */
-  @media (max-width: 680px) {
-    nav { padding: 0 16px; }
-    section { padding: 40px 16px; }
-    .stats-bar { gap: 24px; padding: 16px; }
-    .hero-title { font-size: 60px; }
-    .cart-sidebar { width: 100%; right: -100%; }
-    .form-row { grid-template-columns: 1fr; }
-    footer { padding: 24px 16px; flex-direction: column; text-align: center; }
-  }
-
-  /* GLOW EFFECTS */
-  .glow-cyan { color: var(--neon); text-shadow: 0 0 16px var(--neon); }
-  .glow-orange { color: var(--neon2); text-shadow: 0 0 16px var(--neon2); }
-
-  /* PRODUCT DETAIL MODAL */
-  .product-detail-img {
-    width: 100%;
-    height: 220px;
-    object-fit: cover;
-    background: var(--bg3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 80px;
-    color: var(--muted);
-    overflow: hidden;
-  }
-
-  /* DIVIDER */
-  .divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 24px 0;
-  }
-
-  /* Scrollbar global */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  *{-webkit-tap-highlight-color:transparent;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden;background:#f8fafc}
+  #root{height:100%;display:flex;flex-direction:column}
+  input,select,textarea{-webkit-appearance:none;border-radius:0}
+  ::-webkit-scrollbar{display:none}
+  .pb-safe{padding-bottom:max(20px,env(safe-area-inset-bottom))}
+  .pt-safe{padding-top:max(48px,env(safe-area-inset-top))}
+  @keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+  @keyframes fadeIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes toastIn{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .slide-up{animation:slideUp .28s cubic-bezier(.32,0,.67,0) forwards}
+  .fade-in{animation:fadeIn .2s ease forwards}
+  .spin{animation:spin 1s linear infinite}
+  .toast-in{animation:toastIn .25s ease forwards}
+  .receipt-shadow{box-shadow:0 4px 6px -1px rgba(0,0,0,.07),0 2px 4px -2px rgba(0,0,0,.07),0 0 0 1px rgba(0,0,0,.04)}
 </style>
 </head>
 <body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const {useState,useEffect,useRef,useCallback,useMemo,Fragment}=React;
 
-<canvas id="rain-canvas"></canvas>
-
-<!-- NOTIFICATION -->
-<div class="notification" id="notification">
-  <div class="notif-title" id="notif-title">—</div>
-  <div class="notif-text" id="notif-text"></div>
-</div>
-
-<!-- NAV -->
-<nav>
-  <a href="#" class="nav-logo">R15<span>NIGHT</span></a>
-  <div class="nav-links">
-    <a href="#catalogo">Catálogo</a>
-    <a href="#sobre">Sobre</a>
-  </div>
-  <div class="nav-right">
-    <button class="btn-seller" onclick="openSellerLogin()">⚙ VENDEDOR</button>
-    <button class="btn-cart" onclick="openCart()">
-      🛒 CARRINHO
-      <span class="cart-count" id="cart-count">0</span>
-    </button>
-  </div>
-</nav>
-
-<!-- HERO -->
-<div class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-road"></div>
-
-  <!-- Speed lines -->
-  <div class="speed-line" style="top:30%;width:300px;left:5%;animation-delay:0s"></div>
-  <div class="speed-line" style="top:45%;width:200px;left:60%;animation-delay:1.2s"></div>
-  <div class="speed-line" style="top:60%;width:250px;left:20%;animation-delay:2.1s"></div>
-  <div class="speed-line" style="top:25%;width:180px;left:75%;animation-delay:0.7s;background:linear-gradient(90deg,transparent,#ff4400,transparent)"></div>
-
-  <h1 class="hero-title">
-    <div class="line1">YAMAHA</div>
-    <div class="line2">R15</div>
-    <div class="line3">NIGHT RACE</div>
-  </h1>
-  <p class="hero-sub">PEÇAS · ACESSÓRIOS · PERFORMANCE // <span>ENTREGA EM TODO BRASIL</span></p>
-  <div class="hero-cta">
-    <a href="#catalogo" class="btn-primary">VER CATÁLOGO</a>
-  </div>
-</div>
-
-<!-- STATS -->
-<div class="stats-bar">
-  <div class="stat">
-    <span class="stat-num" id="stat-products">0</span>
-    <span class="stat-label">Produtos</span>
-  </div>
-  <div class="stat">
-    <span class="stat-num">24H</span>
-    <span class="stat-label">Despacho</span>
-  </div>
-  <div class="stat">
-    <span class="stat-num">100%</span>
-    <span class="stat-label">Originais</span>
-  </div>
-  <div class="stat">
-    <span class="stat-num">⭐ 5.0</span>
-    <span class="stat-label">Avaliação</span>
-  </div>
-</div>
-
-<!-- CATALOG -->
-<section id="catalogo">
-  <div class="section-header">
-    <h2 class="section-title">CATÁ<span>LOGO</span></h2>
-    <span class="section-tag">// TODOS OS PRODUTOS DISPONÍVEIS</span>
-  </div>
-
-  <!-- SEARCH + FILTER -->
-  <div class="search-bar">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="search-input" placeholder="Buscar produto..." oninput="renderProducts()">
-  </div>
-
-  <div class="filter-bar" id="filter-bar">
-    <button class="filter-btn active" onclick="setFilter('Todos', this)">TODOS</button>
-  </div>
-
-  <div class="product-grid" id="product-grid"></div>
-</section>
-
-<!-- ABOUT -->
-<section id="sobre">
-  <div class="section-header">
-    <h2 class="section-title">SOBRE <span>NÓS</span></h2>
-  </div>
-  <p style="color:var(--muted);font-size:15px;line-height:1.8;max-width:700px;letter-spacing:0.5px">
-    Somos especialistas em Yamaha R15, focados na comunidade de corrida de rua noturna. 
-    Fornecemos peças originais, acessórios de performance e personalização para você 
-    dominar cada curva. Qualidade garantida, entrega rápida para todo o Brasil. 
-    A pista não espera — nem nós.
-  </p>
-</section>
-
-<!-- FOOTER -->
-<footer>
-  <div class="footer-logo">R15<span>NIGHT</span></div>
-  <div class="footer-text">© 2025 R15NIGHT · TODOS OS DIREITOS RESERVADOS</div>
-  <div class="footer-text">PIX · CARTÃO · BOLETO</div>
-</footer>
-
-<!-- CART SIDEBAR -->
-<div class="cart-overlay" id="cart-overlay" onclick="closeCart()"></div>
-<div class="cart-sidebar" id="cart-sidebar">
-  <div class="cart-header">
-    <h2>MEU CARRINHO</h2>
-    <button class="btn-close" onclick="closeCart()">✕</button>
-  </div>
-  <div class="cart-items" id="cart-items-list"></div>
-  <div class="cart-footer">
-    <div class="cart-total-row">
-      <span class="cart-total-label">TOTAL</span>
-      <span class="cart-total-value" id="cart-total">R$ 0,00</span>
-    </div>
-    <button class="btn-checkout" id="btn-checkout" onclick="openCheckout()" disabled>FINALIZAR COMPRA</button>
-  </div>
-</div>
-
-<!-- CHECKOUT MODAL -->
-<div class="modal-overlay" id="checkout-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title" id="checkout-modal-title">CHECKOUT</span>
-      <button class="btn-close" onclick="closeCheckout()">✕</button>
-    </div>
-    <div class="modal-body" id="checkout-body">
-    </div>
-  </div>
-</div>
-
-<!-- SELLER LOGIN MODAL -->
-<div class="modal-overlay" id="seller-login-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title">ÁREA DO VENDEDOR</span>
-      <button class="btn-close" onclick="closeSellerLogin()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="login-logo">⚡ ACESSO RESTRITO ⚡</div>
-      <div class="form-group">
-        <label class="form-label">Usuário</label>
-        <input class="form-input" id="seller-user" type="text" placeholder="vendedor" autocomplete="username">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Senha</label>
-        <input class="form-input" id="seller-pass" type="password" placeholder="••••••••" autocomplete="current-password">
-        <div class="form-error" id="login-error" style="display:none">Usuário ou senha incorretos.</div>
-      </div>
-      <button class="btn-primary" style="width:100%;text-align:center" onclick="doSellerLogin()">ENTRAR</button>
-      <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:16px;letter-spacing:1px">
-        Usuário: <strong style="color:var(--neon)">vendedor</strong> &nbsp;|&nbsp; Senha: <strong style="color:var(--neon)">r15night</strong>
-      </p>
-    </div>
-  </div>
-</div>
-
-<!-- SELLER PANEL MODAL -->
-<div class="modal-overlay" id="seller-panel-modal">
-  <div class="modal" style="max-width:680px">
-    <div class="modal-header">
-      <span class="modal-title">PAINEL DO VENDEDOR</span>
-      <div style="display:flex;gap:10px">
-        <button class="btn-danger" onclick="doSellerLogout()" style="font-size:12px">SAIR</button>
-        <button class="btn-close" onclick="closeSellerPanel()">✕</button>
-      </div>
-    </div>
-    <div class="modal-body">
-      <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('add')">➕ ADICIONAR</button>
-        <button class="tab-btn" onclick="switchTab('manage')">📦 GERENCIAR</button>
-      </div>
-
-      <!-- ADD PRODUCT TAB -->
-      <div class="tab-content active" id="tab-add">
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Nome do Produto *</label>
-            <input class="form-input" id="p-name" type="text" placeholder="Ex: Escapamento Akrapovic">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Categoria *</label>
-            <select class="form-select" id="p-category">
-              <option value="">Selecionar...</option>
-              <option>Escapamento</option>
-              <option>Farol</option>
-              <option>Carenagem</option>
-              <option>Motor</option>
-              <option>Suspensão</option>
-              <option>Freio</option>
-              <option>Elétrica</option>
-              <option>Pneu</option>
-              <option>Acessório</option>
-              <option>Vestuário</option>
-              <option>Outro</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Descrição</label>
-          <textarea class="form-textarea" id="p-desc" placeholder="Descrição do produto, compatibilidade, material..."></textarea>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Preço (R$) *</label>
-            <input class="form-input" id="p-price" type="number" min="0" step="0.01" placeholder="0,00">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Estoque</label>
-            <input class="form-input" id="p-stock" type="number" min="1" value="1" placeholder="1">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Badge (opcional)</label>
-          <input class="form-input" id="p-badge" type="text" placeholder="Ex: NOVO, OFERTA, EXCLUSIVO">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">URL da Imagem (opcional)</label>
-          <input class="form-input" id="p-img" type="url" placeholder="https://..." oninput="previewImg()">
-          <img id="img-preview" class="img-preview" alt="preview">
-        </div>
-
-        <div class="form-error" id="add-product-error" style="display:none;margin-bottom:12px"></div>
-
-        <button class="btn-primary" style="width:100%;text-align:center" onclick="addProduct()">
-          ➕ ADICIONAR AO CATÁLOGO
-        </button>
-      </div>
-
-      <!-- MANAGE TAB -->
-      <div class="tab-content" id="tab-manage">
-        <p style="font-size:13px;color:var(--muted);margin-bottom:16px;letter-spacing:1px">
-          <span id="manage-count">0</span> produto(s) no catálogo.
-        </p>
-        <div class="seller-products" id="seller-products-list"></div>
-        <div id="manage-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">
-          <span style="font-size:40px;display:block;margin-bottom:12px">📭</span>
-          <p style="letter-spacing:2px">Nenhum produto cadastrado.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- PRODUCT DETAIL MODAL -->
-<div class="modal-overlay" id="product-detail-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title" id="detail-title">PRODUTO</span>
-      <button class="btn-close" onclick="closeProductDetail()">✕</button>
-    </div>
-    <div class="modal-body" id="detail-body"></div>
-  </div>
-</div>
-
-<!-- EDIT PRODUCT MODAL -->
-<div class="modal-overlay" id="edit-product-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title">EDITAR PRODUTO</span>
-      <button class="btn-close" onclick="closeEditModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="edit-id">
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Nome *</label>
-          <input class="form-input" id="edit-name" type="text">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Categoria *</label>
-          <select class="form-select" id="edit-category">
-            <option>Escapamento</option><option>Farol</option><option>Carenagem</option>
-            <option>Motor</option><option>Suspensão</option><option>Freio</option>
-            <option>Elétrica</option><option>Pneu</option><option>Acessório</option>
-            <option>Vestuário</option><option>Outro</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Descrição</label>
-        <textarea class="form-textarea" id="edit-desc"></textarea>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Preço (R$) *</label>
-          <input class="form-input" id="edit-price" type="number" min="0" step="0.01">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Estoque</label>
-          <input class="form-input" id="edit-stock" type="number" min="1">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Badge</label>
-          <input class="form-input" id="edit-badge" type="text">
-        </div>
-        <div class="form-group">
-          <label class="form-label">URL da Imagem</label>
-          <input class="form-input" id="edit-img" type="url">
-        </div>
-      </div>
-      <button class="btn-primary" style="width:100%;text-align:center" onclick="saveEdit()">💾 SALVAR ALTERAÇÕES</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// ─── STATE ─────────────────────────────────────────────────────────────────
-const SELLER_USER = 'vendedor';
-const SELLER_PASS = 'r15night';
-const PIX_KEY = '11999999999';
-
-let products = [];
-let cart = [];
-let activeFilter = 'Todos';
-let isLoggedIn = false;
-let checkoutStep = 1;
-let paymentMethod = 'pix';
-
-// ─── STORAGE ────────────────────────────────────────────────────────────────
-function saveProducts() { localStorage.setItem('r15_products', JSON.stringify(products)); }
-function loadProducts() {
-  const d = localStorage.getItem('r15_products');
-  if (d) products = JSON.parse(d);
-  else products = getDefaultProducts();
-}
-function saveCart() { localStorage.setItem('r15_cart', JSON.stringify(cart)); }
-function loadCart() {
-  const d = localStorage.getItem('r15_cart');
-  if (d) cart = JSON.parse(d);
-}
-
-function getDefaultProducts() {
-  return [
-    { id: uid(), name: 'Escapamento Full Akrapovic', category: 'Escapamento', desc: 'Escapamento completo em titânio, ganho de 8cv. Compatível com YZF-R15 V3/V4.', price: 2890, stock: 3, badge: 'BEST SELLER', img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80' },
-    { id: uid(), name: 'Farol LED BiXenon', category: 'Farol', desc: 'Kit farol LED com projetor bi-xenon, temperatura 6000K. Plug & Play para R15.', price: 680, stock: 5, badge: 'NOVO', img: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&q=80' },
-    { id: uid(), name: 'Pneu Dunlop Sportmax Q4', category: 'Pneu', desc: 'Pneu traseiro 140/70-17 para pista e estrada. Máxima aderência em curvas.', price: 480, stock: 8, badge: '', img: 'https://images.unsplash.com/photo-1558980664-2cd663cf8466?w=400&q=80' },
-    { id: uid(), name: 'Kit Carenagem Completo', category: 'Carenagem', desc: 'Carenagem em ABS de alta resistência. Inclui laterais, frontal e painel.', price: 1850, stock: 2, badge: 'OFERTA', img: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&q=80' },
-    { id: uid(), name: 'Freio a Disco Brembo', category: 'Freio', desc: 'Disco dianteiro Brembo 282mm com pastilhas de alta performance.', price: 1240, stock: 4, badge: '', img: '' },
-    { id: uid(), name: 'Jaqueta Night Racer', category: 'Vestuário', desc: 'Jaqueta de couro sintético com proteções CE nível 2. Visual street racing.', price: 790, stock: 6, badge: 'EXCLUSIVO', img: 'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=400&q=80' },
-  ];
-}
-
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
-
-// ─── RAIN CANVAS ─────────────────────────────────────────────────────────────
-(function() {
-  const canvas = document.getElementById('rain-canvas');
-  const ctx = canvas.getContext('2d');
-  let drops = [];
-  function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    drops = Array.from({length: 120}, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      len: Math.random() * 20 + 10,
-      spd: Math.random() * 4 + 2,
-      op: Math.random() * 0.5 + 0.1
-    }));
-  }
-  resize();
-  window.addEventListener('resize', resize);
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drops.forEach(d => {
-      ctx.strokeStyle = `rgba(0,200,255,${d.op})`;
-      ctx.lineWidth = 0.8;
-      ctx.beginPath();
-      ctx.moveTo(d.x, d.y);
-      ctx.lineTo(d.x - 1, d.y + d.len);
-      ctx.stroke();
-      d.y += d.spd;
-      if (d.y > canvas.height) { d.y = -d.len; d.x = Math.random() * canvas.width; }
+// ═══════════════════════════════════════════════════════════════════
+// SUPABASE REST API — sem dependência de biblioteca, puro fetch
+// Troque SUPABASE_URL e SUPABASE_ANON_KEY pelas suas credenciais
+// ou deixe em branco: a tela de configuração pedirá no primeiro acesso
+// ═══════════════════════════════════════════════════════════════════
+const buildApi=(url,key)=>{
+  const hdr={
+    'apikey':key,
+    'Authorization':`Bearer ${key}`,
+    'Content-Type':'application/json',
+    'Prefer':'return=representation'
+  };
+  return async(endpoint,method='GET',body=null)=>{
+    const r=await fetch(`${url}/rest/v1/${endpoint}`,{
+      method,headers:hdr,...(body?{body:JSON.stringify(body)}:{})
     });
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
+    if(r.status===204||r.status===200&&method==='DELETE')return[];
+    const d=await r.json();
+    if(!r.ok)throw new Error(d?.message||d?.hint||`Erro ${r.status}`);
+    return Array.isArray(d)?d:[d];
+  };
+};
 
-// ─── NOTIFICATION ───────────────────────────────────────────────────────────
-let notifTimeout;
-function showNotif(title, text, type='success') {
-  const el = document.getElementById('notification');
-  document.getElementById('notif-title').textContent = title;
-  document.getElementById('notif-text').textContent = text;
-  el.className = `notification ${type} show`;
-  clearTimeout(notifTimeout);
-  notifTimeout = setTimeout(() => el.classList.remove('show'), 3200);
+// ═══════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════
+const fmt$=(v)=>'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+const fmtDate=(d)=>{
+  if(!d)return'—';
+  const[y,m,day]=d.split('-');
+  return`${day}/${m}/${y}`;
+};
+const todayStr=()=>{
+  const d=new Date();
+  return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+};
+const uid=()=>Math.random().toString(36).slice(2,10);
+
+// ═══════════════════════════════════════════════════════════
+// SVG ICONS (Lucide paths inline — sem dependência)
+// ═══════════════════════════════════════════════════════════
+const PATHS={
+  Package:'<path d="M11 21H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2v3"/><path d="M13 21l2-2m0 0l2-2m-2 2l2 2m-2-2l-2-2"/><path d="M20 14v3a2 2 0 01-2 2h-3"/>',
+  Cart:'<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 002 1.58h9.78a2 2 0 001.95-1.57l1.65-7.43H5.12"/>',
+  Bell:'<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>',
+  Chart:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+  Plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  Trash:'<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>',
+  Edit:'<path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>',
+  Check:'<polyline points="20 6 9 17 4 12"/>',
+  X:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  Alert:'<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="1" fill="currentColor"/>',
+  Clock:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  Share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>',
+  Settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>',
+  User:'<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  Phone:'<path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>',
+  Calendar:'<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+  Money:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>',
+  Search:'<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  CheckCircle:'<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+  Download:'<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+  Refresh:'<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>',
+  Back:'<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',
+  Right:'<polyline points="9 18 15 12 9 6"/>',
+  Wallet:'<path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 14a2 2 0 100-4 2 2 0 000 4z"/><path d="M20 7V5a2 2 0 00-2-2H6a2 2 0 00-2 2v2"/>',
+  Receipt:'<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="14" y2="13"/>',
+  Info:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="1" fill="currentColor"/>',
+  Trending:'<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
+  Slash:'<circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>',
+};
+
+const Ic=({n,size=20,cls='',sw=2})=>React.createElement('svg',{
+  xmlns:'http://www.w3.org/2000/svg',width:size,height:size,
+  viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',
+  strokeWidth:sw,strokeLinecap:'round',strokeLinejoin:'round',
+  className:cls,dangerouslySetInnerHTML:{__html:PATHS[n]||''}
+});
+
+// ═══════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════
+function useToast(){
+  const[list,set]=useState([]);
+  const add=useCallback((msg,type='ok')=>{
+    const id=uid();
+    set(l=>[...l,{id,msg,type}]);
+    setTimeout(()=>set(l=>l.filter(x=>x.id!==id)),3200);
+  },[]);
+  return[list,add];
 }
 
-// ─── FILTER / SEARCH ────────────────────────────────────────────────────────
-function setFilter(cat, btn) {
-  activeFilter = cat;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderProducts();
+function Toasts({list}){
+  const cfg={ok:{bg:'bg-green-500',ic:'Check'},error:{bg:'bg-red-500',ic:'X'},warn:{bg:'bg-amber-400',ic:'Alert'}};
+  return(
+    <div className="fixed top-4 inset-x-4 z-[9999] flex flex-col gap-2 pointer-events-none">
+      {list.map(t=>(
+        <div key={t.id} className={`toast-in ${cfg[t.type]?.bg||'bg-gray-800'} text-white rounded-2xl px-4 py-3 flex items-center gap-2.5 shadow-xl`}>
+          <Ic n={cfg[t.type]?.ic||'Info'} size={16}/>
+          <span className="text-sm font-semibold">{t.msg}</span>
+        </div>
+      ))}
+    </div>
+  );
 }
 
-function rebuildFilters() {
-  const cats = ['Todos', ...new Set(products.map(p => p.category))];
-  const bar = document.getElementById('filter-bar');
-  bar.innerHTML = cats.map(c =>
-    `<button class="filter-btn${c===activeFilter?' active':''}" onclick="setFilter('${c}',this)">${c.toUpperCase()}</button>`
-  ).join('');
-  document.getElementById('stat-products').textContent = products.length;
-}
+// ═══════════════════════════════════════════════════════════
+// SHARED UI COMPONENTS
+// ═══════════════════════════════════════════════════════════
+const Inp=({label,hint,...p})=>(
+  <div>
+    {label&&<label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">{label}</label>}
+    <input className="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent placeholder:text-gray-300 transition" {...p}/>
+    {hint&&<p className="text-xs text-gray-400 mt-1">{hint}</p>}
+  </div>
+);
 
-function renderProducts() {
-  const q = document.getElementById('search-input').value.toLowerCase();
-  let list = products;
-  if (activeFilter !== 'Todos') list = list.filter(p => p.category === activeFilter);
-  if (q) list = list.filter(p => p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q));
-  const grid = document.getElementById('product-grid');
-  if (list.length === 0) {
-    grid.innerHTML = `<div class="empty-state"><span class="icon">🏍️</span><h3>NENHUM PRODUTO ENCONTRADO</h3><p>Tente outra busca ou categoria.</p></div>`;
-    return;
-  }
-  grid.innerHTML = list.map(p => `
-    <div class="product-card" onclick="openProductDetail('${p.id}')">
-      <div class="product-img-wrap">
-        ${p.img ? `<img src="${p.img}" alt="${p.name}" onerror="this.parentElement.innerHTML='<span class=product-no-img>🏍️</span>'">` : '<span class="product-no-img">🏍️</span>'}
-        ${p.badge ? `<span class="product-badge">${p.badge}</span>` : ''}
+const Btn=({children,v='primary',sz='md',cls='',loading=false,...p})=>{
+  const base='rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-[.97] disabled:opacity-50 disabled:pointer-events-none select-none';
+  const vs={
+    primary:'bg-brand-600 text-white hover:bg-brand-700 shadow-sm shadow-brand-200',
+    danger:'bg-red-500 text-white hover:bg-red-600',
+    outline:'border-2 border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50',
+    ghost:'text-gray-500 hover:bg-gray-100',
+    green:'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100',
+  };
+  const szs={sm:'px-3 py-2 text-xs',md:'px-5 py-3.5 text-sm',lg:'w-full px-5 py-4 text-base'};
+  return(
+    <button className={`${base} ${vs[v]} ${szs[sz]} ${cls}`} {...p}>
+      {loading&&<Ic n="Refresh" size={16} cls="spin"/>}
+      {children}
+    </button>
+  );
+};
+
+function Sheet({open,onClose,title,children,full=false}){
+  if(!open)return null;
+  return(
+    <div className="fixed inset-0 z-50 flex items-end">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose}/>
+      <div className={`relative bg-white rounded-t-[28px] w-full slide-up ${full?'h-[95vh]':'max-h-[90vh]'} flex flex-col shadow-2xl`}>
+        <div className="flex-shrink-0 flex items-center justify-between px-5 pt-5 pb-4 border-b border-gray-100">
+          <span className="text-base font-bold text-gray-900">{title}</span>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+            <Ic n="X" size={16} cls="text-gray-500"/>
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-5">{children}</div>
       </div>
-      <div class="product-body">
-        <div class="product-category">${p.category}</div>
-        <div class="product-name">${p.name}</div>
-        <div class="product-desc">${p.desc || 'Produto de alta qualidade para sua R15.'}</div>
-        <div class="product-footer">
-          <div class="product-price"><small>R$</small> ${fmtPrice(p.price)}</div>
-          <button class="btn-add-cart" onclick="event.stopPropagation();addToCart('${p.id}')">+ CARRINHO</button>
+    </div>
+  );
+}
+
+function StatusBadge({status,due}){
+  const td=todayStr();
+  let cfg;
+  if(status==='pago')cfg={cls:'bg-green-100 text-green-700',label:'✓ PAGO'};
+  else if(due<td)cfg={cls:'bg-red-100 text-red-600',label:'ATRASADO'};
+  else if(due===td)cfg={cls:'bg-amber-100 text-amber-700',label:'VENCE HOJE'};
+  else cfg={cls:'bg-gray-100 text-gray-500',label:'PENDENTE'};
+  return<span className={`text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wide ${cfg.cls}`}>{cfg.label}</span>;
+}
+
+// ═══════════════════════════════════════════════════════════
+// SETUP SCREEN
+// ═══════════════════════════════════════════════════════════
+function SetupScreen({onSave}){
+  const[url,setUrl]=useState('');
+  const[key,setKey]=useState('');
+  const[loading,setLoading]=useState(false);
+  const[err,setErr]=useState('');
+
+  const connect=async()=>{
+    if(!url.trim()||!key.trim()){setErr('Preencha os dois campos.');return;}
+    setLoading(true);setErr('');
+    try{
+      await buildApi(url.trim(),key.trim())('produtos?limit=1');
+      onSave({url:url.trim(),key:key.trim()});
+    }catch(e){
+      setErr('Não foi possível conectar. Verifique a URL e a chave anon, e se as tabelas foram criadas (veja o SQL no README).');
+    }finally{setLoading(false);}
+  };
+
+  return(
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-brand-600 via-brand-700 to-emerald-900 p-6">
+      <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl p-7 fade-in">
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 bg-brand-50 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-inner">
+            <Ic n="Wallet" size={36} cls="text-brand-600"/>
+          </div>
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Fiado App</h1>
+          <p className="text-gray-400 text-sm mt-1.5">Controle de vendas a crédito</p>
+        </div>
+
+        <div className="space-y-4">
+          <Inp label="Supabase Project URL" value={url} onChange={e=>setUrl(e.target.value)} placeholder="https://xxxx.supabase.co"/>
+          <Inp label="Anon Key (público)" value={key} onChange={e=>setKey(e.target.value)} placeholder="eyJhbGciOiJIUzI1NiIs..." type="password"/>
+          {err&&<div className="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 text-xs text-red-600">{err}</div>}
+          <Btn v="primary" sz="lg" onClick={connect} loading={loading} disabled={loading}>
+            {!loading&&<Ic n="Check" size={18}/>}
+            {loading?'Conectando...':'Conectar'}
+          </Btn>
+        </div>
+
+        <div className="mt-6 bg-gray-50 rounded-2xl p-4 text-xs text-gray-500 space-y-1.5">
+          <p className="font-bold text-gray-700 flex items-center gap-1.5"><Ic n="Info" size={13}/>Como obter as credenciais:</p>
+          <p>1. Acesse <strong>app.supabase.com</strong></p>
+          <p>2. Selecione seu projeto</p>
+          <p>3. <strong>Project Settings → API</strong></p>
+          <p>4. Copie <em>Project URL</em> e <em>anon public key</em></p>
         </div>
       </div>
     </div>
-  `).join('');
+  );
 }
 
-function fmtPrice(n) { return Number(n).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+// ═══════════════════════════════════════════════════════════
+// ABA: ESTOQUE
+// ═══════════════════════════════════════════════════════════
+function EstoqueTab({api,toast}){
+  const[produtos,setProdutos]=useState([]);
+  const[loading,setLoading]=useState(true);
+  const[sheet,setSheet]=useState(null);// null|'add'|produto
+  const[search,setSearch]=useState('');
+  const[form,setForm]=useState({nome:'',preco:'',quantidade:''});
+  const[saving,setSaving]=useState(false);
 
-// ─── PRODUCT DETAIL ─────────────────────────────────────────────────────────
-function openProductDetail(id) {
-  const p = products.find(x => x.id === id);
-  if (!p) return;
-  document.getElementById('detail-title').textContent = p.name.toUpperCase();
-  document.getElementById('detail-body').innerHTML = `
-    <div class="product-detail-img">
-      ${p.img ? `<img src="${p.img}" alt="${p.name}" style="width:100%;height:220px;object-fit:cover" onerror="this.parentElement.innerHTML='🏍️'">` : '🏍️'}
+  const load=useCallback(async()=>{
+    setLoading(true);
+    try{const d=await api('produtos?order=nome.asc');setProdutos(d);}
+    catch(e){toast('Erro ao carregar: '+e.message,'error');}
+    finally{setLoading(false);}
+  },[api]);
+
+  useEffect(()=>{load();},[load]);
+
+  const openAdd=()=>{setForm({nome:'',preco:'',quantidade:''});setSheet('add');};
+  const openEdit=(p)=>{setForm({nome:p.nome,preco:p.preco,quantidade:p.quantidade});setSheet(p);};
+
+  const salvar=async()=>{
+    if(!form.nome.trim()||!form.preco||form.quantidade===''){toast('Preencha todos os campos','warn');return;}
+    setSaving(true);
+    try{
+      if(sheet==='add'){
+        await api('produtos','POST',{nome:form.nome.trim(),preco:+form.preco,quantidade:+form.quantidade});
+        toast('Produto adicionado!');
+      }else{
+        await api(`produtos?id=eq.${sheet.id}`,'PATCH',{nome:form.nome.trim(),preco:+form.preco,quantidade:+form.quantidade});
+        toast('Produto atualizado!');
+      }
+      setSheet(null);load();
+    }catch(e){toast('Erro: '+e.message,'error');}
+    finally{setSaving(false);}
+  };
+
+  const excluir=async(p)=>{
+    if(!confirm(`Excluir "${p.nome}"?`))return;
+    try{await api(`produtos?id=eq.${p.id}`,'DELETE');toast('Removido');load();}
+    catch(e){toast('Erro ao excluir','error');}
+  };
+
+  const F=produtos.filter(p=>p.nome.toLowerCase().includes(search.toLowerCase()));
+
+  return(
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="bg-brand-600 pt-safe px-4 pb-4">
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-xl font-extrabold text-white">Estoque</h1>
+          <button onClick={load} className="p-2 bg-brand-700 rounded-xl">
+            <Ic n="Refresh" size={16} cls={`text-white${loading?' spin':''}`}/>
+          </button>
+        </div>
+        <div className="relative">
+          <Ic n="Search" size={15} cls="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/50"/>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar produto..." className="w-full bg-white/15 border border-white/20 text-white placeholder:text-white/50 rounded-2xl pl-10 pr-4 py-2.5 text-sm outline-none focus:bg-white/25"/>
+        </div>
+      </div>
+
+      {/* Summary bar */}
+      {!loading&&(
+        <div className="bg-white border-b border-gray-100 flex divide-x text-center">
+          <div className="flex-1 py-2.5">
+            <p className="text-lg font-extrabold text-gray-800">{produtos.length}</p>
+            <p className="text-[10px] text-gray-400 uppercase tracking-wide">Produtos</p>
+          </div>
+          <div className="flex-1 py-2.5">
+            <p className="text-lg font-extrabold text-amber-500">{produtos.filter(p=>p.quantidade<=5&&p.quantidade>0).length}</p>
+            <p className="text-[10px] text-gray-400 uppercase tracking-wide">Baixo Est.</p>
+          </div>
+          <div className="flex-1 py-2.5">
+            <p className="text-lg font-extrabold text-red-500">{produtos.filter(p=>p.quantidade===0).length}</p>
+            <p className="text-[10px] text-gray-400 uppercase tracking-wide">Zerados</p>
+          </div>
+        </div>
+      )}
+
+      {/* List */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-2.5 pb-28">
+        {loading?(
+          <div className="flex justify-center items-center py-20"><Ic n="Refresh" size={28} cls="text-gray-300 spin"/></div>
+        ):F.length===0?(
+          <div className="flex flex-col items-center justify-center py-20 text-gray-300">
+            <Ic n="Package" size={44} cls="mb-3"/>
+            <p className="font-bold text-gray-400">{search?'Nenhum resultado':'Estoque vazio'}</p>
+            <p className="text-sm text-gray-300 mt-1">Toque no + para adicionar</p>
+          </div>
+        ):F.map(p=>(
+          <div key={p.id} className={`bg-white rounded-2xl p-4 flex items-center gap-3 receipt-shadow border ${p.quantidade===0?'border-red-200':p.quantidade<=5?'border-amber-200':'border-transparent'}`}>
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${p.quantidade===0?'bg-red-50':p.quantidade<=5?'bg-amber-50':'bg-brand-50'}`}>
+              <Ic n="Package" size={20} cls={p.quantidade===0?'text-red-400':p.quantidade<=5?'text-amber-500':'text-brand-500'}/>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-gray-900 text-sm truncate">{p.nome}</p>
+              <p className="text-brand-600 font-bold text-sm mt-0.5">{fmt$(p.preco)}</p>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${p.quantidade===0?'bg-red-100 text-red-600':p.quantidade<=5?'bg-amber-100 text-amber-600':'bg-gray-100 text-gray-500'}`}>
+                {p.quantidade===0?'SEM ESTOQUE':p.quantidade<=5?`⚠ ${p.quantidade} un.`:`${p.quantidade} unid.`}
+              </span>
+            </div>
+            <div className="flex gap-1.5">
+              <button onClick={()=>openEdit(p)} className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
+                <Ic n="Edit" size={15} cls="text-blue-500"/>
+              </button>
+              <button onClick={()=>excluir(p)} className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center">
+                <Ic n="Trash" size={15} cls="text-red-400"/>
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* FAB */}
+      <button onClick={openAdd} className="fixed bottom-24 right-4 w-14 h-14 bg-brand-600 text-white rounded-2xl shadow-xl shadow-brand-200 flex items-center justify-center z-20 active:scale-95">
+        <Ic n="Plus" size={26}/>
+      </button>
+
+      {/* Sheet: Add/Edit */}
+      <Sheet open={!!sheet} onClose={()=>setSheet(null)} title={sheet==='add'?'Novo Produto':'Editar Produto'}>
+        <div className="space-y-4">
+          <Inp label="Nome do produto" value={form.nome} onChange={e=>setForm({...form,nome:e.target.value})} placeholder="Ex: Refrigerante 2L"/>
+          <div className="grid grid-cols-2 gap-3">
+            <Inp label="Preço (R$)" type="number" step="0.01" min="0" value={form.preco} onChange={e=>setForm({...form,preco:e.target.value})} placeholder="0,00"/>
+            <Inp label="Quantidade" type="number" min="0" value={form.quantidade} onChange={e=>setForm({...form,quantidade:e.target.value})} placeholder="0"/>
+          </div>
+          <Btn v="primary" sz="lg" onClick={salvar} loading={saving} disabled={saving}>
+            {!saving&&<Ic n="Check" size={18}/>}
+            {sheet==='add'?'Adicionar Produto':'Salvar Alterações'}
+          </Btn>
+        </div>
+      </Sheet>
     </div>
-    <div style="padding-top:20px">
-      <div class="product-category">${p.category}</div>
-      <p style="color:var(--muted);font-size:14px;line-height:1.8;margin:12px 0 20px">${p.desc || '—'}</p>
-      <hr class="divider">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-        <div class="product-price"><small>R$</small> ${fmtPrice(p.price)}</div>
-        <span style="font-size:12px;color:var(--muted);letter-spacing:2px">ESTOQUE: ${p.stock}</span>
-      </div>
-      <button class="btn-primary" style="width:100%;text-align:center" onclick="addToCart('${p.id}');closeProductDetail()">🛒 ADICIONAR AO CARRINHO</button>
-    </div>
-  `;
-  document.getElementById('product-detail-modal').classList.add('open');
+  );
 }
 
-function closeProductDetail() { document.getElementById('product-detail-modal').classList.remove('open'); }
+// ═══════════════════════════════════════════════════════════
+// ABA: NOVA VENDA (wizard 3 etapas)
+// ═══════════════════════════════════════════════════════════
+function VendaTab({api,toast,onVendaCriada}){
+  const[etapa,setEtapa]=useState(1);
+  const[produtos,setProdutos]=useState([]);
+  const[cliente,setCliente]=useState({nome:'',telefone:''});
+  const[carrinho,setCarrinho]=useState([]);
+  const[datas,setDatas]=useState({data_venda:todayStr(),data_vencimento:''});
+  const[obs,setObs]=useState('');
+  const[search,setSearch]=useState('');
+  const[saving,setSaving]=useState(false);
+  const[venda,setVenda]=useState(null);// recibo
+  const receiptRef=useRef(null);
 
-// ─── CART ───────────────────────────────────────────────────────────────────
-function addToCart(id) {
-  const p = products.find(x => x.id === id);
-  if (!p) return;
-  const existing = cart.find(c => c.id === id);
-  if (existing) {
-    if (existing.qty >= p.stock) { showNotif('Limite atingido', 'Estoque máximo no carrinho.', 'error'); return; }
-    existing.qty++;
-  } else {
-    cart.push({ id: p.id, name: p.name, price: p.price, img: p.img, qty: 1 });
-  }
-  saveCart();
-  updateCartUI();
-  showNotif('Adicionado!', `${p.name} no carrinho.`, 'success');
-}
+  useEffect(()=>{
+    api('produtos?order=nome.asc').then(setProdutos).catch(()=>{});
+  },[api]);
 
-function removeFromCart(id) {
-  cart = cart.filter(c => c.id !== id);
-  saveCart();
-  updateCartUI();
-  renderCartItems();
-}
+  const addItem=(p)=>{
+    const ex=carrinho.find(c=>c.id===p.id);
+    const qtAtual=ex?ex.qty:0;
+    if(qtAtual>=p.quantidade){toast('Estoque insuficiente','warn');return;}
+    setCarrinho(ex
+      ?carrinho.map(c=>c.id===p.id?{...c,qty:c.qty+1}:c)
+      :[...carrinho,{...p,qty:1}]
+    );
+  };
 
-function changeQty(id, delta) {
-  const item = cart.find(c => c.id === id);
-  if (!item) return;
-  const p = products.find(x => x.id === id);
-  item.qty = Math.max(1, Math.min(item.qty + delta, p ? p.stock : 99));
-  saveCart();
-  updateCartUI();
-  renderCartItems();
-}
-
-function getCartTotal() { return cart.reduce((s, c) => s + c.price * c.qty, 0); }
-
-function updateCartUI() {
-  const total = cart.reduce((s,c) => s+c.qty, 0);
-  document.getElementById('cart-count').textContent = total;
-  document.getElementById('cart-total').textContent = 'R$ ' + fmtPrice(getCartTotal());
-  document.getElementById('btn-checkout').disabled = cart.length === 0;
-}
-
-function renderCartItems() {
-  const list = document.getElementById('cart-items-list');
-  if (cart.length === 0) {
-    list.innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--muted)"><span style="font-size:48px;display:block;margin-bottom:12px">🛒</span><p style="letter-spacing:2px">Carrinho vazio</p></div>`;
-    return;
-  }
-  list.innerHTML = cart.map(item => `
-    <div class="cart-item">
-      <div class="cart-item-img">
-        ${item.img ? `<img src="${item.img}" alt="${item.name}" onerror="this.parentElement.innerHTML='🏍️'">` : '🏍️'}
-      </div>
-      <div class="cart-item-info">
-        <div class="cart-item-name">${item.name}</div>
-        <div class="cart-item-price">R$ ${fmtPrice(item.price)}</div>
-        <div class="cart-item-qty">
-          <button class="qty-btn" onclick="changeQty('${item.id}',-1)">−</button>
-          <span class="qty-num">${item.qty}</span>
-          <button class="qty-btn" onclick="changeQty('${item.id}',1)">+</button>
-        </div>
-      </div>
-      <button class="btn-remove-cart" onclick="removeFromCart('${item.id}')" title="Remover">🗑</button>
-    </div>
-  `).join('');
-}
-
-function openCart() {
-  renderCartItems();
-  document.getElementById('cart-overlay').classList.add('open');
-  document.getElementById('cart-sidebar').classList.add('open');
-}
-
-function closeCart() {
-  document.getElementById('cart-overlay').classList.remove('open');
-  document.getElementById('cart-sidebar').classList.remove('open');
-}
-
-// ─── CHECKOUT ────────────────────────────────────────────────────────────────
-function openCheckout() {
-  checkoutStep = 1;
-  paymentMethod = 'pix';
-  closeCart();
-  document.getElementById('checkout-modal').classList.add('open');
-  renderCheckout();
-}
-
-function closeCheckout() {
-  document.getElementById('checkout-modal').classList.remove('open');
-}
-
-function renderCheckout() {
-  const modal = document.getElementById('checkout-modal');
-  const title = document.getElementById('checkout-modal-title');
-  const body = document.getElementById('checkout-body');
-
-  const stepLabels = ['DADOS', 'PAGAMENTO', 'CONFIRMAR'];
-  const stepsHtml = `
-    <div class="checkout-steps">
-      ${stepLabels.map((l,i) => `<div class="checkout-step ${i+1===checkoutStep?'active':i+1<checkoutStep?'done':''}">${i+1<checkoutStep?'✓ ':''}${l}</div>`).join('')}
-    </div>
-  `;
-
-  if (checkoutStep === 1) {
-    title.textContent = 'SEUS DADOS';
-    body.innerHTML = stepsHtml + `
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Nome Completo *</label>
-          <input class="form-input" id="c-name" placeholder="João da Silva">
-        </div>
-        <div class="form-group">
-          <label class="form-label">CPF *</label>
-          <input class="form-input" id="c-cpf" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">WhatsApp *</label>
-          <input class="form-input" id="c-phone" placeholder="(11) 99999-9999" maxlength="15" oninput="maskPhone(this)">
-        </div>
-        <div class="form-group">
-          <label class="form-label">E-mail *</label>
-          <input class="form-input" id="c-email" type="email" placeholder="seuemail@email.com">
-        </div>
-      </div>
-      <hr class="divider">
-      <p style="font-size:12px;letter-spacing:2px;color:var(--muted);margin-bottom:16px">ENDEREÇO DE ENTREGA</p>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">CEP *</label>
-          <input class="form-input" id="c-cep" placeholder="00000-000" maxlength="9" oninput="maskCEP(this)">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Número *</label>
-          <input class="form-input" id="c-num" placeholder="123">
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Rua / Bairro / Cidade *</label>
-        <input class="form-input" id="c-addr" placeholder="Rua das Flores, Bairro, São Paulo - SP">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Complemento</label>
-        <input class="form-input" id="c-comp" placeholder="Apto, bloco...">
-      </div>
-      <div class="form-error" id="checkout-error" style="display:none;margin-bottom:12px"></div>
-      <button class="btn-primary" style="width:100%;text-align:center;margin-top:8px" onclick="checkoutNext()">PRÓXIMO →</button>
-    `;
-  }
-  else if (checkoutStep === 2) {
-    title.textContent = 'PAGAMENTO';
-    body.innerHTML = stepsHtml + `
-      <p style="font-size:12px;letter-spacing:2px;color:var(--muted);margin-bottom:16px">FORMA DE PAGAMENTO</p>
-      <div class="payment-options">
-        <div class="payment-opt ${paymentMethod==='pix'?'selected':''}" onclick="selectPayment('pix',this)">
-          <span class="pay-icon">💸</span>PIX
-        </div>
-        <div class="payment-opt ${paymentMethod==='card'?'selected':''}" onclick="selectPayment('card',this)">
-          <span class="pay-icon">💳</span>CARTÃO
-        </div>
-        <div class="payment-opt ${paymentMethod==='boleto'?'selected':''}" onclick="selectPayment('boleto',this)">
-          <span class="pay-icon">📄</span>BOLETO
-        </div>
-      </div>
-      <div id="payment-detail"></div>
-      <button class="btn-primary" style="width:100%;text-align:center;margin-top:20px" onclick="checkoutNext()">CONFIRMAR →</button>
-      <button onclick="checkoutBack()" style="width:100%;background:transparent;border:none;color:var(--muted);margin-top:10px;cursor:pointer;font-size:13px;letter-spacing:1px;padding:8px">← VOLTAR</button>
-    `;
-    renderPaymentDetail();
-  }
-  else if (checkoutStep === 3) {
-    title.textContent = 'CONFIRMAR PEDIDO';
-    const orderItems = cart.map(c => `
-      <div class="order-item">
-        <span class="order-item-name">${c.name} × ${c.qty}</span>
-        <span class="order-item-price">R$ ${fmtPrice(c.price * c.qty)}</span>
-      </div>
-    `).join('');
-    body.innerHTML = stepsHtml + `
-      <div class="order-items">${orderItems}</div>
-      <div class="order-total">
-        <span class="order-total-label">TOTAL</span>
-        <span class="order-total-price">R$ ${fmtPrice(getCartTotal())}</span>
-      </div>
-      <hr class="divider">
-      <div style="margin-bottom:20px">
-        ${paymentMethod==='pix' ? renderPixBox() : paymentMethod==='card' ? `<p style="font-size:13px;color:var(--muted);letter-spacing:1px">💳 Pagamento por cartão. Você receberá o link de pagamento por WhatsApp/e-mail.</p>` : `<p style="font-size:13px;color:var(--muted);letter-spacing:1px">📄 Boleto bancário. Será enviado por e-mail em até 5 minutos.</p>`}
-      </div>
-      <button class="btn-primary" style="width:100%;text-align:center" onclick="finishOrder()">✅ FINALIZAR PEDIDO</button>
-      <button onclick="checkoutBack()" style="width:100%;background:transparent;border:none;color:var(--muted);margin-top:10px;cursor:pointer;font-size:13px;letter-spacing:1px;padding:8px">← VOLTAR</button>
-    `;
-  }
-  else if (checkoutStep === 4) {
-    title.textContent = 'PEDIDO REALIZADO!';
-    const orderId = 'R15-' + Date.now().toString(36).toUpperCase();
-    body.innerHTML = `
-      <div class="success-state">
-        <span class="success-icon">🏁</span>
-        <div class="success-title">PEDIDO CONFIRMADO!</div>
-        <p class="success-sub">Você receberá a confirmação por e-mail e WhatsApp em breve.</p>
-        <div class="order-id">PEDIDO: ${orderId}</div>
-        <div style="margin-top:20px;font-size:13px;color:var(--muted);letter-spacing:1px">
-          Prazo de entrega: <strong style="color:var(--neon)">3–7 dias úteis</strong>
-        </div>
-        <button class="btn-primary" style="margin-top:32px" onclick="closeCheckout()">CONTINUAR COMPRANDO</button>
-      </div>
-    `;
-  }
-}
-
-function renderPaymentDetail() {
-  const d = document.getElementById('payment-detail');
-  if (!d) return;
-  if (paymentMethod === 'pix') {
-    d.innerHTML = `<p style="font-size:13px;color:var(--muted);line-height:1.7;letter-spacing:0.5px">Após confirmar, você receberá o QR Code e chave PIX para pagamento imediato. Aprovação em segundos.</p>`;
-  } else if (paymentMethod === 'card') {
-    d.innerHTML = `
-      <div class="form-group">
-        <label class="form-label">Número do Cartão</label>
-        <input class="form-input" id="c-card" placeholder="0000 0000 0000 0000" maxlength="19" oninput="maskCard(this)">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Validade</label>
-          <input class="form-input" id="c-exp" placeholder="MM/AA" maxlength="5" oninput="maskExpiry(this)">
-        </div>
-        <div class="form-group">
-          <label class="form-label">CVV</label>
-          <input class="form-input" id="c-cvv" placeholder="000" maxlength="3">
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Nome no Cartão</label>
-        <input class="form-input" id="c-cardname" placeholder="JOÃO DA SILVA">
-      </div>
-    `;
-  } else {
-    d.innerHTML = `<p style="font-size:13px;color:var(--muted);letter-spacing:0.5px;line-height:1.7">O boleto bancário será enviado para seu e-mail em até 5 minutos. Vencimento em 3 dias úteis.</p>`;
-  }
-}
-
-function renderPixBox() {
-  return `
-    <div class="pix-box">
-      <div class="pix-label">CHAVE PIX (TELEFONE)</div>
-      <div class="qr-placeholder"><div class="qr-inner"></div></div>
-      <div class="pix-code">${PIX_KEY}</div>
-      <p style="font-size:12px;color:var(--muted);letter-spacing:1px">Valor: <strong style="color:var(--gold)">R$ ${fmtPrice(getCartTotal())}</strong></p>
-      <button onclick="copyPix()" style="margin-top:12px;background:transparent;border:1px solid var(--neon);color:var(--neon);padding:8px 20px;cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700;font-size:13px;letter-spacing:2px;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)">📋 COPIAR CHAVE</button>
-    </div>
-  `;
-}
-
-function copyPix() {
-  navigator.clipboard.writeText(PIX_KEY).catch(()=>{});
-  showNotif('Copiado!', 'Chave PIX copiada.', 'success');
-}
-
-function selectPayment(method, el) {
-  paymentMethod = method;
-  document.querySelectorAll('.payment-opt').forEach(e => e.classList.remove('selected'));
-  el.classList.add('selected');
-  renderPaymentDetail();
-}
-
-function checkoutNext() {
-  if (checkoutStep === 1) {
-    const n = v('c-name'), cp = v('c-cpf'), ph = v('c-phone'), em = v('c-email'), addr = v('c-addr'), cep = v('c-cep'), num = v('c-num');
-    if (!n || !cp || !ph || !em || !addr || !cep || !num) {
-      showErr('checkout-error', 'Preencha todos os campos obrigatórios (*).');
-      return;
+  const setQty=(id,v)=>{
+    if(v<=0)setCarrinho(carrinho.filter(c=>c.id!==id));
+    else{
+      const p=carrinho.find(c=>c.id===id);
+      if(!p)return;
+      if(v>p.quantidade){toast('Estoque insuficiente','warn');return;}
+      setCarrinho(carrinho.map(c=>c.id===id?{...c,qty:v}:c));
     }
-    if (!em.includes('@')) { showErr('checkout-error', 'E-mail inválido.'); return; }
-  }
-  checkoutStep++;
-  renderCheckout();
-}
+  };
 
-function checkoutBack() { checkoutStep = Math.max(1, checkoutStep-1); renderCheckout(); }
+  const total=carrinho.reduce((s,c)=>s+c.preco*c.qty,0);
 
-function finishOrder() {
-  // Discount stock
-  cart.forEach(item => {
-    const p = products.find(x => x.id === item.id);
-    if (p) p.stock = Math.max(0, p.stock - item.qty);
-  });
-  saveProducts();
-  cart = [];
-  saveCart();
-  updateCartUI();
-  checkoutStep = 4;
-  renderCheckout();
-}
+  const finalizar=async()=>{
+    if(!cliente.nome.trim()){toast('Informe o nome do cliente','warn');return;}
+    if(carrinho.length===0){toast('Carrinho vazio','warn');return;}
+    if(!datas.data_vencimento){toast('Informe a data de vencimento','warn');return;}
+    setSaving(true);
+    try{
+      const[v]=await api('vendas','POST',{
+        cliente_nome:cliente.nome.trim(),
+        cliente_telefone:cliente.telefone.trim()||null,
+        total,
+        data_venda:datas.data_venda,
+        data_vencimento:datas.data_vencimento,
+        status:'pendente',
+        observacao:obs.trim()||null
+      });
+      for(const item of carrinho){
+        await api('itens_venda','POST',{
+          venda_id:v.id,produto_id:item.id,
+          produto_nome:item.nome,quantidade:item.qty,
+          preco_unitario:item.preco,subtotal:item.preco*item.qty
+        });
+        // decrementar estoque
+        const prod=produtos.find(p=>p.id===item.id);
+        if(prod)await api(`produtos?id=eq.${item.id}`,'PATCH',{quantidade:prod.quantidade-item.qty});
+      }
+      toast('Venda registrada!');
+      setVenda({v,cliente,carrinho,total,datas,obs});
+      onVendaCriada();
+    }catch(e){toast('Erro: '+e.message,'error');}
+    finally{setSaving(false);}
+  };
 
-// ─── MASKS ───────────────────────────────────────────────────────────────────
-function maskCPF(el) { el.value = el.value.replace(/\D/g,'').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2'); }
-function maskPhone(el) { el.value = el.value.replace(/\D/g,'').replace(/^(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d)/,'$1-$2'); }
-function maskCEP(el) { el.value = el.value.replace(/\D/g,'').replace(/(\d{5})(\d)/,'$1-$2'); }
-function maskCard(el) { el.value = el.value.replace(/\D/g,'').replace(/(\d{4})/g,'$1 ').trim(); }
-function maskExpiry(el) { el.value = el.value.replace(/\D/g,'').replace(/(\d{2})(\d)/,'$1/$2'); }
+  const reset=()=>{
+    setEtapa(1);setCliente({nome:'',telefone:''});setCarrinho([]);
+    setDatas({data_venda:todayStr(),data_vencimento:''});setObs('');setVenda(null);
+    api('produtos?order=nome.asc').then(setProdutos).catch(()=>{});
+  };
 
-function v(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
-function showErr(id, msg) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.textContent = msg;
-  el.style.display = 'block';
-  setTimeout(() => el.style.display='none', 4000);
-}
+  if(venda)return<Recibo data={venda} rRef={receiptRef} onNova={reset} toast={toast}/>;
 
-// ─── SELLER AUTH ─────────────────────────────────────────────────────────────
-function openSellerLogin() {
-  if (isLoggedIn) { openSellerPanel(); return; }
-  document.getElementById('seller-login-modal').classList.add('open');
-}
-function closeSellerLogin() { document.getElementById('seller-login-modal').classList.remove('open'); }
+  const filtrados=produtos.filter(p=>p.nome.toLowerCase().includes(search.toLowerCase()));
 
-function doSellerLogin() {
-  const u = document.getElementById('seller-user').value;
-  const p = document.getElementById('seller-pass').value;
-  if (u === SELLER_USER && p === SELLER_PASS) {
-    isLoggedIn = true;
-    document.getElementById('login-error').style.display = 'none';
-    closeSellerLogin();
-    openSellerPanel();
-  } else {
-    document.getElementById('login-error').style.display = 'block';
-  }
-}
-
-function doSellerLogout() {
-  isLoggedIn = false;
-  closeSellerPanel();
-  showNotif('Saiu!', 'Sessão de vendedor encerrada.', 'success');
-}
-
-// ─── SELLER PANEL ────────────────────────────────────────────────────────────
-function openSellerPanel() {
-  document.getElementById('seller-panel-modal').classList.add('open');
-  switchTab('add');
-  renderSellerProducts();
-}
-function closeSellerPanel() { document.getElementById('seller-panel-modal').classList.remove('open'); }
-
-function switchTab(name) {
-  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (name==='add'&&i===0)||(name==='manage'&&i===1)));
-  document.getElementById('tab-add').classList.toggle('active', name==='add');
-  document.getElementById('tab-manage').classList.toggle('active', name==='manage');
-  if (name==='manage') renderSellerProducts();
-}
-
-function addProduct() {
-  const name = v('p-name');
-  const cat  = document.getElementById('p-category').value;
-  const price = parseFloat(document.getElementById('p-price').value);
-  const stock = parseInt(document.getElementById('p-stock').value)||1;
-  const desc  = v('p-desc');
-  const badge = v('p-badge');
-  const img   = v('p-img');
-
-  if (!name) { showErr('add-product-error','Nome é obrigatório.'); return; }
-  if (!cat)  { showErr('add-product-error','Selecione uma categoria.'); return; }
-  if (!price || price <= 0) { showErr('add-product-error','Preço inválido.'); return; }
-
-  products.push({ id: uid(), name, category: cat, desc, price, stock, badge, img });
-  saveProducts();
-  rebuildFilters();
-  renderProducts();
-
-  // reset
-  ['p-name','p-desc','p-price','p-badge','p-img'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-  document.getElementById('p-category').value='';
-  document.getElementById('p-stock').value='1';
-  document.getElementById('img-preview').style.display='none';
-  document.getElementById('add-product-error').style.display='none';
-
-  showNotif('Produto adicionado!', name + ' está no catálogo.', 'success');
-  switchTab('manage');
-}
-
-function previewImg() {
-  const url = document.getElementById('p-img').value;
-  const preview = document.getElementById('img-preview');
-  if (url) { preview.src = url; preview.style.display='block'; }
-  else preview.style.display='none';
-}
-
-function renderSellerProducts() {
-  const list = document.getElementById('seller-products-list');
-  const empty = document.getElementById('manage-empty');
-  document.getElementById('manage-count').textContent = products.length;
-  if (products.length === 0) { list.style.display='none'; empty.style.display='block'; return; }
-  empty.style.display='none'; list.style.display='flex';
-  list.innerHTML = products.map(p => `
-    <div class="seller-product-row">
-      <div class="seller-product-img-placeholder" style="width:50px;height:44px;overflow:hidden;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--muted)">
-        ${p.img ? `<img src="${p.img}" style="width:50px;height:44px;object-fit:cover" onerror="this.parentElement.innerHTML='🏍️'">` : '🏍️'}
+  const Step=({n,l})=>(
+    <div className={`flex-1 flex flex-col items-center gap-1`}>
+      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${etapa>n?'bg-white text-brand-700':etapa===n?'bg-white text-brand-700':'bg-white/20 text-white/50'}`}>
+        {etapa>n?<Ic n="Check" size={14}/>:n}
       </div>
-      <div class="seller-product-info">
-        <div class="seller-product-name">${p.name}</div>
-        <div class="seller-product-meta">${p.category} · R$ ${fmtPrice(p.price)} · Estoque: ${p.stock}</div>
-      </div>
-      <button class="btn-edit" onclick="openEditModal('${p.id}')">✏</button>
-      <button class="btn-danger" onclick="deleteProduct('${p.id}')">🗑</button>
+      <span className={`text-[10px] font-semibold ${etapa>=n?'text-white':'text-white/40'}`}>{l}</span>
     </div>
-  `).join('');
+  );
+
+  return(
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="bg-brand-600 pt-safe px-4 pb-4">
+        <h1 className="text-xl font-extrabold text-white mb-4">Nova Venda</h1>
+        <div className="flex items-center gap-2">
+          <Step n={1} l="Cliente"/>
+          <div className={`flex-1 h-0.5 rounded-full ${etapa>1?'bg-white':'bg-white/20'}`}/>
+          <Step n={2} l="Itens"/>
+          <div className={`flex-1 h-0.5 rounded-full ${etapa>2?'bg-white':'bg-white/20'}`}/>
+          <Step n={3} l="Confirmar"/>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 pb-28 space-y-3">
+
+        {/* ETAPA 1: CLIENTE */}
+        {etapa===1&&(
+          <div className="fade-in space-y-4">
+            <div className="bg-white rounded-3xl p-5 receipt-shadow space-y-4">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-8 h-8 rounded-xl bg-brand-50 flex items-center justify-center">
+                  <Ic n="User" size={16} cls="text-brand-600"/>
+                </div>
+                <p className="font-bold text-gray-800">Dados do Cliente</p>
+              </div>
+              <Inp label="Nome completo *" value={cliente.nome} onChange={e=>setCliente({...cliente,nome:e.target.value})} placeholder="Nome do cliente"/>
+              <Inp label="WhatsApp (opcional)" type="tel" value={cliente.telefone} onChange={e=>setCliente({...cliente,telefone:e.target.value})} placeholder="(11) 99999-9999" hint="Usado para cobrar via WhatsApp"/>
+            </div>
+            <Btn v="primary" sz="lg" onClick={()=>{if(!cliente.nome.trim()){toast('Informe o nome','warn');return;}setEtapa(2);}}>
+              Próximo: Adicionar Itens <Ic n="Right" size={18}/>
+            </Btn>
+          </div>
+        )}
+
+        {/* ETAPA 2: ITENS */}
+        {etapa===2&&(
+          <div className="fade-in space-y-3">
+            {carrinho.length>0&&(
+              <div className="bg-white rounded-3xl receipt-shadow overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 bg-brand-50 border-b border-brand-100">
+                  <span className="font-bold text-brand-700 text-sm">Carrinho ({carrinho.length})</span>
+                  <span className="font-extrabold text-brand-700">{fmt$(total)}</span>
+                </div>
+                {carrinho.map(c=>(
+                  <div key={c.id} className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 last:border-0">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-gray-900 truncate">{c.nome}</p>
+                      <p className="text-xs text-gray-400">{fmt$(c.preco)} × {c.qty} = <strong className="text-brand-600">{fmt$(c.preco*c.qty)}</strong></p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button onClick={()=>setQty(c.id,c.qty-1)} className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-black text-base leading-none">−</button>
+                      <span className="w-5 text-center text-sm font-bold">{c.qty}</span>
+                      <button onClick={()=>setQty(c.id,c.qty+1)} className="w-7 h-7 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-black text-base leading-none">+</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="relative">
+              <Ic n="Search" size={15} cls="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"/>
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar produto..." className="w-full bg-white border border-gray-200 rounded-2xl pl-10 pr-4 py-3 text-sm outline-none focus:ring-2 focus:ring-brand-400 receipt-shadow"/>
+            </div>
+
+            {filtrados.length===0&&(
+              <div className="text-center py-8 text-gray-300">
+                <Ic n="Slash" size={32} cls="mx-auto mb-2"/>
+                <p className="text-sm">Nenhum produto encontrado</p>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              {filtrados.map(p=>(
+                <div key={p.id} className={`bg-white rounded-2xl p-3.5 flex items-center gap-3 receipt-shadow ${p.quantidade===0?'opacity-40':''}`}>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm text-gray-900 truncate">{p.nome}</p>
+                    <p className="text-xs text-brand-600 font-bold mt-0.5">{fmt$(p.preco)} <span className="text-gray-300 font-normal">· {p.quantidade} disp.</span></p>
+                  </div>
+                  <button onClick={()=>addItem(p)} disabled={p.quantidade===0} className="w-9 h-9 bg-brand-600 text-white rounded-xl flex items-center justify-center active:scale-90 disabled:opacity-30">
+                    <Ic n="Plus" size={18}/>
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Btn v="outline" sz="md" cls="flex-1" onClick={()=>setEtapa(1)}><Ic n="Back" size={16}/>Voltar</Btn>
+              <Btn v="primary" sz="md" cls="flex-1" onClick={()=>{if(carrinho.length===0){toast('Adicione ao menos 1 item','warn');return;}setEtapa(3);}}>
+                Confirmar <Ic n="Right" size={16}/>
+              </Btn>
+            </div>
+          </div>
+        )}
+
+        {/* ETAPA 3: CONFIRMAR */}
+        {etapa===3&&(
+          <div className="fade-in space-y-4">
+            <div className="bg-white rounded-3xl p-5 receipt-shadow space-y-4">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-8 h-8 rounded-xl bg-brand-50 flex items-center justify-center">
+                  <Ic n="Calendar" size={16} cls="text-brand-600"/>
+                </div>
+                <p className="font-bold text-gray-800">Datas</p>
+              </div>
+              <Inp label="Data da venda" type="date" value={datas.data_venda} onChange={e=>setDatas({...datas,data_venda:e.target.value})}/>
+              <Inp label="Data de vencimento (cobrança) *" type="date" value={datas.data_vencimento} onChange={e=>setDatas({...datas,data_vencimento:e.target.value})}/>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">Observação</label>
+                <textarea value={obs} onChange={e=>setObs(e.target.value)} rows={2} placeholder="Ex: parcelado, desconto combinado..." className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"/>
+              </div>
+            </div>
+
+            {/* Resumo */}
+            <div className="bg-brand-600 rounded-3xl p-5 text-white">
+              <p className="text-brand-200 text-xs font-bold uppercase tracking-widest mb-3">Resumo</p>
+              <div className="space-y-1.5 mb-4">
+                {carrinho.map(c=>(
+                  <div key={c.id} className="flex justify-between text-sm">
+                    <span className="text-brand-100">{c.nome} × {c.qty}</span>
+                    <span className="font-bold">{fmt$(c.preco*c.qty)}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="border-t border-brand-500 pt-3 flex justify-between items-center">
+                <span className="font-extrabold text-lg">TOTAL</span>
+                <span className="font-extrabold text-2xl">{fmt$(total)}</span>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Btn v="outline" sz="md" cls="flex-1" onClick={()=>setEtapa(2)}><Ic n="Back" size={16}/>Voltar</Btn>
+              <Btn v="primary" sz="md" cls="flex-1" onClick={finalizar} loading={saving} disabled={saving}>
+                {!saving&&<Ic n="Check" size={16}/>}
+                {saving?'Salvando...':'Finalizar Venda'}
+              </Btn>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
-function deleteProduct(id) {
-  if (!confirm('Remover este produto do catálogo?')) return;
-  products = products.filter(p => p.id !== id);
-  cart = cart.filter(c => c.id !== id);
-  saveProducts();
-  saveCart();
-  updateCartUI();
-  rebuildFilters();
-  renderProducts();
-  renderSellerProducts();
-  showNotif('Removido!', 'Produto excluído do catálogo.', 'error');
+// ═══════════════════════════════════════════════════════════
+// RECIBO (NOTINHA)
+// ═══════════════════════════════════════════════════════════
+function Recibo({data,rRef,onNova,toast}){
+  const{v,cliente,carrinho,total,datas,obs}=data;
+  const[dl,setDl]=useState(false);
+
+  const gerarImg=async()=>{
+    if(!window.html2canvas){toast('Aguarde o carregamento','warn');return;}
+    setDl(true);
+    try{
+      const el=rRef.current;
+      const canvas=await window.html2canvas(el,{scale:3,backgroundColor:'#fff',useCORS:true,logging:false});
+      return canvas;
+    }catch(e){toast('Erro ao gerar imagem','error');return null;}
+    finally{setDl(false);}
+  };
+
+  const baixar=async()=>{
+    const c=await gerarImg();
+    if(!c)return;
+    const a=document.createElement('a');
+    a.href=c.toDataURL('image/png');
+    a.download=`recibo-${cliente.nome.replace(/\s+/g,'-').toLowerCase()}.png`;
+    a.click();
+    toast('Imagem salva!');
+  };
+
+  const compartilhar=async()=>{
+    const c=await gerarImg();
+    if(!c)return;
+    c.toBlob(async blob=>{
+      if(!blob)return;
+      try{
+        if(navigator.share&&navigator.canShare){
+          const file=new File([blob],'recibo.png',{type:'image/png'});
+          if(navigator.canShare({files:[file]})){
+            await navigator.share({files:[file],title:`Recibo - ${cliente.nome}`,text:`Valor: ${fmt$(total)} | Vence: ${fmtDate(datas.data_vencimento)}`});
+            return;
+          }
+        }
+        // Fallback: download
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');a.href=url;a.download='recibo.png';a.click();
+        URL.revokeObjectURL(url);
+      }catch(e){}
+    },'image/png');
+  };
+
+  const pid=v.id.split('-')[0].toUpperCase();
+
+  return(
+    <div className="flex flex-col h-full bg-gray-100">
+      <div className="bg-brand-600 pt-safe px-4 pb-4 flex items-center gap-3">
+        <button onClick={onNova} className="w-9 h-9 bg-brand-700 rounded-xl flex items-center justify-center">
+          <Ic n="Back" size={18} cls="text-white"/>
+        </button>
+        <h1 className="text-xl font-extrabold text-white flex items-center gap-2">
+          <Ic n="CheckCircle" size={20}/> Venda Registrada!
+        </h1>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 pb-28">
+        {/* THE RECEIPT */}
+        <div ref={rRef} className="bg-white mx-auto max-w-sm rounded-3xl overflow-hidden receipt-shadow" style={{fontFamily:'Plus Jakarta Sans, sans-serif'}}>
+          {/* Cabeçalho */}
+          <div className="bg-brand-600 px-6 pt-7 pb-6 text-center">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3">
+              <Ic n="Wallet" size={22} cls="text-white"/>
+            </div>
+            <p className="text-white font-extrabold text-xl tracking-tight">FIADO APP</p>
+            <p className="text-brand-200 text-xs mt-0.5">Comprovante de Venda</p>
+          </div>
+
+          {/* Info topo */}
+          <div className="px-6 py-4 bg-brand-50 flex justify-between items-center border-b border-dashed border-brand-200">
+            <div>
+              <p className="text-[10px] text-brand-400 font-bold uppercase tracking-wide">Pedido Nº</p>
+              <p className="text-brand-700 font-extrabold font-mono text-sm">{pid}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] text-brand-400 font-bold uppercase tracking-wide">Data</p>
+              <p className="text-brand-700 font-bold text-sm">{fmtDate(datas.data_venda)}</p>
+            </div>
+          </div>
+
+          {/* Cliente */}
+          <div className="px-6 py-4 border-b border-dashed border-gray-200">
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-1">Cliente</p>
+            <p className="font-extrabold text-gray-900 text-base">{cliente.nome}</p>
+            {cliente.telefone&&<p className="text-sm text-gray-500 mt-0.5">{cliente.telefone}</p>}
+          </div>
+
+          {/* Itens */}
+          <div className="px-6 py-4 border-b border-dashed border-gray-200">
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide mb-3">Itens</p>
+            <div className="space-y-2.5">
+              {carrinho.map((c,i)=>(
+                <div key={i} className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">{c.nome}</p>
+                    <p className="text-xs text-gray-400">{c.qty}× {fmt$(c.preco)}</p>
+                  </div>
+                  <p className="text-sm font-extrabold text-gray-900">{fmt$(c.preco*c.qty)}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Total */}
+          <div className="px-6 py-5 bg-gray-50">
+            <div className="flex justify-between items-center">
+              <span className="text-gray-500 font-bold text-sm uppercase tracking-wide">Total</span>
+              <span className="text-2xl font-extrabold text-brand-600">{fmt$(total)}</span>
+            </div>
+          </div>
+
+          {/* Vencimento */}
+          <div className="px-6 py-5 text-center border-t border-dashed border-gray-200">
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Data de Vencimento</p>
+            <p className="text-lg font-extrabold text-red-500 mt-1">{fmtDate(datas.data_vencimento)}</p>
+            {obs&&<p className="text-xs text-gray-400 mt-2 italic">"{obs}"</p>}
+          </div>
+
+          {/* Rodapé */}
+          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 text-center">
+            <p className="text-[11px] text-gray-400">Gerado com Fiado App · fiado.app</p>
+            <div className="flex justify-center gap-0.5 mt-2">
+              {Array(28).fill(0).map((_,i)=><span key={i} className="w-1 h-1 rounded-full bg-gray-200"/>)}
+            </div>
+          </div>
+        </div>
+
+        {/* Botões de ação */}
+        <div className="mt-5 space-y-3 max-w-sm mx-auto">
+          <Btn v="primary" sz="lg" onClick={compartilhar} loading={dl} disabled={dl}>
+            {!dl&&<Ic n="Share" size={18}/>}
+            Compartilhar via WhatsApp
+          </Btn>
+          <Btn v="outline" sz="lg" onClick={baixar} disabled={dl}>
+            <Ic n="Download" size={18}/>
+            Salvar como Imagem
+          </Btn>
+          <Btn v="ghost" sz="lg" onClick={onNova}>
+            <Ic n="Plus" size={18}/>
+            Nova Venda
+          </Btn>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-// ─── EDIT MODAL ──────────────────────────────────────────────────────────────
-function openEditModal(id) {
-  const p = products.find(x => x.id===id);
-  if (!p) return;
-  document.getElementById('edit-id').value = id;
-  document.getElementById('edit-name').value = p.name;
-  document.getElementById('edit-category').value = p.category;
-  document.getElementById('edit-desc').value = p.desc;
-  document.getElementById('edit-price').value = p.price;
-  document.getElementById('edit-stock').value = p.stock;
-  document.getElementById('edit-badge').value = p.badge||'';
-  document.getElementById('edit-img').value = p.img||'';
-  document.getElementById('edit-product-modal').classList.add('open');
+// ═══════════════════════════════════════════════════════════
+// ABA: ALERTAS
+// ═══════════════════════════════════════════════════════════
+function AlertasTab({api,toast,onAtualizar}){
+  const[vendas,setVendas]=useState([]);
+  const[loading,setLoading]=useState(true);
+
+  const load=useCallback(async()=>{
+    setLoading(true);
+    try{
+      const d=await api('vendas?status=eq.pendente&order=data_vencimento.asc');
+      setVendas(d);
+    }catch(e){toast('Erro: '+e.message,'error');}
+    finally{setLoading(false);}
+  },[api]);
+
+  useEffect(()=>{load();},[load]);
+
+  const marcarPago=async(id,nome)=>{
+    try{
+      await api(`vendas?id=eq.${id}`,'PATCH',{status:'pago'});
+      toast(`${nome} — marcado como pago ✓`);
+      load();onAtualizar();
+    }catch(e){toast('Erro','error');}
+  };
+
+  const td=todayStr();
+  const atrasadas=vendas.filter(v=>v.data_vencimento<td);
+  const hoje=vendas.filter(v=>v.data_vencimento===td);
+  const futuras=vendas.filter(v=>v.data_vencimento>td);
+
+  const Card=({v,variant})=>{
+    const isAtrasado=variant==='atrasada';
+    const isHoje=variant==='hoje';
+    return(
+      <div className={`bg-white rounded-2xl p-4 receipt-shadow border-l-4 ${isAtrasado?'border-red-400':isHoje?'border-amber-400':'border-gray-200'}`}>
+        <div className="flex items-start gap-3">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isAtrasado?'bg-red-50':isHoje?'bg-amber-50':'bg-gray-50'}`}>
+            <Ic n={isAtrasado?'Alert':isHoje?'Clock':'Calendar'} size={18} cls={isAtrasado?'text-red-500':isHoje?'text-amber-500':'text-gray-400'}/>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <StatusBadge status={v.status} due={v.data_vencimento}/>
+            </div>
+            <p className="font-extrabold text-gray-900">{v.cliente_nome}</p>
+            <p className="text-brand-600 font-bold">{fmt$(v.total)}</p>
+            <p className="text-xs text-gray-400 mt-0.5">Vence: {fmtDate(v.data_vencimento)}</p>
+            {v.observacao&&<p className="text-xs text-gray-400 italic mt-0.5">"{v.observacao}"</p>}
+          </div>
+          <button onClick={()=>marcarPago(v.id,v.cliente_nome)} className="w-10 h-10 bg-brand-100 rounded-xl flex items-center justify-center active:scale-90 flex-shrink-0" title="Marcar como pago">
+            <Ic n="CheckCircle" size={20} cls="text-brand-600"/>
+          </button>
+        </div>
+        {v.cliente_telefone&&(
+          <a href={`https://wa.me/55${v.cliente_telefone.replace(/\D/g,'')}`} target="_blank" rel="noreferrer" className="mt-3 flex items-center gap-1.5 text-xs font-bold text-green-600 border border-green-200 bg-green-50 rounded-xl px-3 py-2">
+            <Ic n="Phone" size={13}/>
+            Cobrar via WhatsApp
+          </a>
+        )}
+      </div>
+    );
+  };
+
+  const Secao=({titulo,icon,items,variant,cor})=>items.length===0?null:(
+    <div>
+      <div className={`flex items-center gap-2 mb-2.5 px-1 ${cor}`}>
+        <Ic n={icon} size={15}/>
+        <p className="font-bold text-sm">{titulo} <span className="font-normal opacity-60">({items.length})</span></p>
+      </div>
+      <div className="space-y-2">{items.map(v=><Card key={v.id} v={v} variant={variant}/>)}</div>
+    </div>
+  );
+
+  return(
+    <div className="flex flex-col h-full">
+      <div className="bg-brand-600 pt-safe px-4 pb-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-extrabold text-white">Alertas</h1>
+          <button onClick={load} className="p-2 bg-brand-700 rounded-xl">
+            <Ic n="Refresh" size={16} cls={`text-white${loading?' spin':''}`}/>
+          </button>
+        </div>
+      </div>
+
+      {/* Contadores */}
+      <div className="bg-white border-b border-gray-100 grid grid-cols-3 divide-x">
+        <div className="py-3 text-center">
+          <p className="text-2xl font-extrabold text-red-500">{atrasadas.length}</p>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Atrasadas</p>
+        </div>
+        <div className="py-3 text-center">
+          <p className="text-2xl font-extrabold text-amber-500">{hoje.length}</p>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Hoje</p>
+        </div>
+        <div className="py-3 text-center">
+          <p className="text-2xl font-extrabold text-gray-500">{futuras.length}</p>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">A Vencer</p>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-5 pb-24">
+        {loading?(
+          <div className="flex justify-center py-20"><Ic n="Refresh" size={28} cls="text-gray-300 spin"/></div>
+        ):vendas.length===0?(
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-20 h-20 bg-brand-50 rounded-3xl flex items-center justify-center mx-auto mb-4">
+              <Ic n="CheckCircle" size={36} cls="text-brand-500"/>
+            </div>
+            <p className="font-extrabold text-brand-600 text-lg">Tudo em dia!</p>
+            <p className="text-sm text-gray-400 mt-1">Nenhuma cobrança pendente</p>
+          </div>
+        ):(
+          <>
+            <Secao titulo="Atrasadas" icon="Alert" items={atrasadas} variant="atrasada" cor="text-red-500"/>
+            <Secao titulo="Vencem Hoje" icon="Clock" items={hoje} variant="hoje" cor="text-amber-500"/>
+            <Secao titulo="A Vencer" icon="Calendar" items={futuras} variant="futura" cor="text-gray-500"/>
+          </>
+        )}
+      </div>
+    </div>
+  );
 }
 
-function closeEditModal() { document.getElementById('edit-product-modal').classList.remove('open'); }
+// ═══════════════════════════════════════════════════════════
+// ABA: RELATÓRIOS
+// ═══════════════════════════════════════════════════════════
+function RelatoriosTab({api,toast}){
+  const[vendas,setVendas]=useState([]);
+  const[loading,setLoading]=useState(true);
+  const[filtro,setFiltro]=useState('todos');
+  const[itensSheet,setItensSheet]=useState(null);
+  const[itensData,setItensData]=useState([]);
 
-function saveEdit() {
-  const id = document.getElementById('edit-id').value;
-  const p = products.find(x => x.id===id);
-  if (!p) return;
-  p.name = document.getElementById('edit-name').value.trim()||p.name;
-  p.category = document.getElementById('edit-category').value;
-  p.desc = document.getElementById('edit-desc').value.trim();
-  p.price = parseFloat(document.getElementById('edit-price').value)||p.price;
-  p.stock = parseInt(document.getElementById('edit-stock').value)||p.stock;
-  p.badge = document.getElementById('edit-badge').value.trim();
-  p.img = document.getElementById('edit-img').value.trim();
-  saveProducts();
-  rebuildFilters();
-  renderProducts();
-  renderSellerProducts();
-  closeEditModal();
-  showNotif('Salvo!', p.name + ' atualizado.', 'success');
+  const load=useCallback(async()=>{
+    setLoading(true);
+    try{const d=await api('vendas?order=data_vencimento.desc');setVendas(d);}
+    catch(e){toast('Erro: '+e.message,'error');}
+    finally{setLoading(false);}
+  },[api]);
+
+  useEffect(()=>{load();},[load]);
+
+  const verItens=async(venda)=>{
+    try{
+      const d=await api(`itens_venda?venda_id=eq.${venda.id}&order=produto_nome.asc`);
+      setItensData(d);setItensSheet(venda);
+    }catch(e){toast('Erro ao buscar itens','error');}
+  };
+
+  const marcar=async(id,status)=>{
+    try{
+      await api(`vendas?id=eq.${id}`,'PATCH',{status});
+      toast(status==='pago'?'Marcado como pago!':'Reaberto como pendente');
+      load();
+    }catch(e){toast('Erro','error');}
+  };
+
+  const excluir=async(id)=>{
+    if(!confirm('Excluir esta venda permanentemente?'))return;
+    try{
+      await api(`itens_venda?venda_id=eq.${id}`,'DELETE');
+      await api(`vendas?id=eq.${id}`,'DELETE');
+      toast('Venda excluída');load();
+    }catch(e){toast('Erro ao excluir','error');}
+  };
+
+  const td=todayStr();
+  const totalPendente=vendas.filter(v=>v.status==='pendente').reduce((s,v)=>s+Number(v.total),0);
+  const totalPago=vendas.filter(v=>v.status==='pago').reduce((s,v)=>s+Number(v.total),0);
+  const filtradas=filtro==='todos'?vendas:vendas.filter(v=>v.status===filtro);
+
+  return(
+    <div className="flex flex-col h-full">
+      <div className="bg-brand-600 pt-safe px-4 pb-4">
+        <div className="flex items-center justify-between mb-0">
+          <h1 className="text-xl font-extrabold text-white">Relatórios</h1>
+          <button onClick={load} className="p-2 bg-brand-700 rounded-xl">
+            <Ic n="Refresh" size={16} cls={`text-white${loading?' spin':''}`}/>
+          </button>
+        </div>
+      </div>
+
+      {/* Cards resumo */}
+      <div className="bg-white border-b border-gray-100 grid grid-cols-3 divide-x">
+        <div className="py-3 px-2 text-center">
+          <p className="text-sm font-extrabold text-red-500 leading-tight">{fmt$(totalPendente)}</p>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mt-0.5">A Receber</p>
+        </div>
+        <div className="py-3 px-2 text-center">
+          <p className="text-sm font-extrabold text-brand-600 leading-tight">{fmt$(totalPago)}</p>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mt-0.5">Recebido</p>
+        </div>
+        <div className="py-3 px-2 text-center">
+          <p className="text-sm font-extrabold text-gray-700 leading-tight">{vendas.length}</p>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mt-0.5">Vendas</p>
+        </div>
+      </div>
+
+      {/* Filtros */}
+      <div className="bg-white border-b border-gray-100 px-4 py-2.5 flex gap-2">
+        {[['todos','Todos'],['pendente','Pendentes'],['pago','Pagos']].map(([v,l])=>(
+          <button key={v} onClick={()=>setFiltro(v)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${filtro===v?'bg-brand-600 text-white':'bg-gray-100 text-gray-500'}`}>{l}</button>
+        ))}
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-2.5 pb-24">
+        {loading?(
+          <div className="flex justify-center py-20"><Ic n="Refresh" size={28} cls="text-gray-300 spin"/></div>
+        ):filtradas.length===0?(
+          <div className="flex flex-col items-center justify-center py-20 text-gray-300">
+            <Ic n="Chart" size={40} cls="mb-3"/>
+            <p className="font-bold text-gray-400">Nenhuma venda</p>
+          </div>
+        ):filtradas.map(v=>(
+          <div key={v.id} className="bg-white rounded-2xl p-4 receipt-shadow">
+            <div className="flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                  <StatusBadge status={v.status} due={v.data_vencimento}/>
+                </div>
+                <p className="font-extrabold text-gray-900">{v.cliente_nome}</p>
+                <p className="text-brand-600 font-bold">{fmt$(v.total)}</p>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Venda: {fmtDate(v.data_venda)} · Vence: {fmtDate(v.data_vencimento)}
+                </p>
+                {v.observacao&&<p className="text-xs text-gray-400 italic mt-0.5">"{v.observacao}"</p>}
+              </div>
+              <div className="flex flex-col gap-1.5">
+                {v.status==='pendente'
+                  ?<button onClick={()=>marcar(v.id,'pago')} className="w-9 h-9 bg-brand-100 rounded-xl flex items-center justify-center" title="Marcar pago"><Ic n="CheckCircle" size={18} cls="text-brand-600"/></button>
+                  :<button onClick={()=>marcar(v.id,'pendente')} className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center" title="Reabrir"><Ic n="Refresh" size={16} cls="text-gray-500"/></button>
+                }
+                <button onClick={()=>excluir(v.id)} className="w-9 h-9 bg-red-50 rounded-xl flex items-center justify-center"><Ic n="Trash" size={16} cls="text-red-400"/></button>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-3">
+              <button onClick={()=>verItens(v)} className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-brand-600 bg-brand-50 border border-brand-100 rounded-xl py-2">
+                <Ic n="Receipt" size={13}/>Ver Itens
+              </button>
+              {v.cliente_telefone&&(
+                <a href={`https://wa.me/55${v.cliente_telefone.replace(/\D/g,'')}`} target="_blank" rel="noreferrer" className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-green-600 bg-green-50 border border-green-100 rounded-xl py-2">
+                  <Ic n="Phone" size={13}/>WhatsApp
+                </a>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Sheet: Itens da venda */}
+      <Sheet open={!!itensSheet} onClose={()=>setItensSheet(null)} title="Itens da Venda">
+        {itensSheet&&(
+          <div className="space-y-3">
+            <div className="bg-gray-50 rounded-2xl p-3 text-sm space-y-1">
+              <p><strong>{itensSheet.cliente_nome}</strong></p>
+              <p className="text-gray-500">Venda: {fmtDate(itensSheet.data_venda)} · Vence: {fmtDate(itensSheet.data_vencimento)}</p>
+            </div>
+            {itensData.map(item=>(
+              <div key={item.id} className="flex justify-between items-center bg-white border border-gray-100 rounded-2xl p-3.5">
+                <div>
+                  <p className="font-bold text-sm text-gray-900">{item.produto_nome}</p>
+                  <p className="text-xs text-gray-400">{item.quantidade}× {fmt$(item.preco_unitario)}</p>
+                </div>
+                <p className="font-extrabold text-brand-600">{fmt$(item.subtotal)}</p>
+              </div>
+            ))}
+            <div className="flex justify-between items-center border-t-2 border-brand-600 pt-3 mt-1">
+              <span className="font-bold text-gray-700">TOTAL</span>
+              <span className="font-extrabold text-xl text-brand-600">{fmt$(itensSheet.total)}</span>
+            </div>
+          </div>
+        )}
+      </Sheet>
+    </div>
+  );
 }
 
-// ─── CLOSE MODAL ON OVERLAY CLICK ───────────────────────────────────────────
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', function(e) {
-    if (e.target === this) {
-      // Don't close checkout or seller panel on overlay click (prevent accidental close)
-      if (this.id === 'checkout-modal' || this.id === 'seller-panel-modal' || this.id === 'seller-login-modal') return;
-      this.classList.remove('open');
-    }
+// ═══════════════════════════════════════════════════════════
+// BARRA DE NAVEGAÇÃO INFERIOR
+// ═══════════════════════════════════════════════════════════
+function NavBar({aba,setAba,alertas}){
+  const tabs=[
+    {id:'estoque',icon:'Package',label:'Estoque'},
+    {id:'venda',icon:'Cart',label:'Venda'},
+    {id:'alertas',icon:'Bell',label:'Alertas',badge:alertas},
+    {id:'relatorios',icon:'Chart',label:'Relatórios'},
+  ];
+  return(
+    <nav className="fixed bottom-0 inset-x-0 bg-white border-t border-gray-100 z-30 pb-safe">
+      <div className="flex max-w-lg mx-auto">
+        {tabs.map(t=>(
+          <button key={t.id} onClick={()=>setAba(t.id)} className={`flex-1 flex flex-col items-center py-2.5 gap-1 relative transition-colors ${aba===t.id?'text-brand-600':'text-gray-400'}`}>
+            {aba===t.id&&<span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-brand-600 rounded-full"/>}
+            <div className="relative">
+              <Ic n={t.icon} size={22} sw={aba===t.id?2.5:1.8}/>
+              {(t.badge||0)>0&&<span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">{t.badge>9?'9+':t.badge}</span>}
+            </div>
+            <span className="text-[10px] font-bold leading-none">{t.label}</span>
+          </button>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// SETTINGS SHEET
+// ═══════════════════════════════════════════════════════════
+function ConfigSheet({open,onClose,config,onReset}){
+  return(
+    <Sheet open={open} onClose={onClose} title="Configurações">
+      <div className="space-y-4">
+        <div className="bg-gray-50 rounded-2xl p-4 font-mono text-xs text-gray-500 space-y-2">
+          <p className="font-bold text-gray-700 font-sans mb-1">Supabase conectado</p>
+          <p className="break-all">{config.url}</p>
+          <p className="truncate">{config.key.slice(0,40)}…</p>
+        </div>
+        <Btn v="danger" sz="lg" onClick={()=>{if(confirm('Desconectar? Você precisará reconectar.'))onReset();}}>
+          <Ic n="X" size={18}/> Desconectar Supabase
+        </Btn>
+        <Btn v="outline" sz="lg" onClick={onClose}>Fechar</Btn>
+      </div>
+    </Sheet>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// APP ROOT
+// ═══════════════════════════════════════════════════════════
+function App(){
+  const[config,setConfig]=useState(()=>{
+    try{const s=localStorage.getItem('fiado_config');return s?JSON.parse(s):null;}catch{return null;}
   });
-});
+  const[aba,setAba]=useState('estoque');
+  const[alertas,setAlertas]=useState(0);
+  const[settings,setSettings]=useState(false);
+  const[toasts,toast]=useToast();
 
-// ─── KEY HANDLER ─────────────────────────────────────────────────────────────
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    closeProductDetail();
-    closeEditModal();
-    closeCart();
-  }
-});
+  const api=useMemo(()=>config?buildApi(config.url,config.key):null,[config]);
 
-// ─── ENTER TO LOGIN ──────────────────────────────────────────────────────────
-['seller-user','seller-pass'].forEach(id => {
-  const el = document.getElementById(id);
-  if (el) el.addEventListener('keydown', e => { if(e.key==='Enter') doSellerLogin(); });
-});
+  const saveConfig=(c)=>{
+    localStorage.setItem('fiado_config',JSON.stringify(c));
+    setConfig(c);
+  };
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
-loadProducts();
-loadCart();
-rebuildFilters();
-renderProducts();
-updateCartUI();
+  const resetConfig=()=>{
+    localStorage.removeItem('fiado_config');
+    setConfig(null);setSettings(false);
+  };
+
+  const loadAlertas=useCallback(async()=>{
+    if(!api)return;
+    try{
+      const td=todayStr();
+      const d=await api(`vendas?status=eq.pendente&data_vencimento=lte.${td}`);
+      setAlertas(d.length);
+    }catch{}
+  },[api]);
+
+  useEffect(()=>{
+    loadAlertas();
+    const t=setInterval(loadAlertas,60000);
+    return()=>clearInterval(t);
+  },[loadAlertas]);
+
+  if(!config)return<><Toasts list={toasts}/><SetupScreen onSave={saveConfig}/></>;
+
+  return(
+    <div className="h-full flex flex-col max-w-lg mx-auto bg-gray-50 relative">
+      <Toasts list={toasts}/>
+
+      {/* Botão settings (canto) */}
+      <button onClick={()=>setSettings(true)} className="absolute top-3 right-4 z-20 p-2 bg-black/20 rounded-xl" style={{top:'max(12px, env(safe-area-inset-top))'}}>
+        <Ic n="Settings" size={16} cls="text-white"/>
+      </button>
+
+      {/* Content */}
+      <div className="flex-1 overflow-hidden">
+        {aba==='estoque'&&<EstoqueTab api={api} toast={toast}/>}
+        {aba==='venda'&&<VendaTab api={api} toast={toast} onVendaCriada={loadAlertas}/>}
+        {aba==='alertas'&&<AlertasTab api={api} toast={toast} onAtualizar={loadAlertas}/>}
+        {aba==='relatorios'&&<RelatoriosTab api={api} toast={toast}/>}
+      </div>
+
+      <NavBar aba={aba} setAba={setAba} alertas={alertas}/>
+      <ConfigSheet open={settings} onClose={()=>setSettings(false)} config={config} onReset={resetConfig}/>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
 </script>
 </body>
 </html>
