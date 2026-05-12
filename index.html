@@ -243,13 +243,13 @@ function SetupScreen({onSave}){
           <div className="w-20 h-20 bg-brand-50 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-inner">
             <Ic n="Wallet" size={36} cls="text-brand-600"/>
           </div>
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Fiado App</h1>
-          <p className="text-gray-400 text-sm mt-1.5">Controle de vendas a crédito</p>
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight"> GRSIApp</h1>
+          <p className="text-gray-400 text-sm mt-1.5">Gestão Rapida com Sistema Integrado</p>
         </div>
 
         <div className="space-y-4">
-          <Inp label="Supabase Project URL" value={url} onChange={e=>setUrl(e.target.value)} placeholder="https://xxxx.supabase.co"/>
-          <Inp label="Anon Key (público)" value={key} onChange={e=>setKey(e.target.value)} placeholder="eyJhbGciOiJIUzI1NiIs..." type="password"/>
+          <Inp label="URL DE ACESSO" value={url} onChange={e=>setUrl(e.target.value)} placeholder="Use URL fornecida"/>
+          <Inp label="KEY DE ACESSO)" value={key} onChange={e=>setKey(e.target.value)} placeholder="Use a senha fornecida" type="password"/>
           {err&&<div className="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 text-xs text-red-600">{err}</div>}
           <Btn v="primary" sz="lg" onClick={connect} loading={loading} disabled={loading}>
             {!loading&&<Ic n="Check" size={18}/>}
@@ -259,10 +259,10 @@ function SetupScreen({onSave}){
 
         <div className="mt-6 bg-gray-50 rounded-2xl p-4 text-xs text-gray-500 space-y-1.5">
           <p className="font-bold text-gray-700 flex items-center gap-1.5"><Ic n="Info" size={13}/>Como obter as credenciais:</p>
-          <p>1. Acesse <strong>app.supabase.com</strong></p>
-          <p>2. Selecione seu projeto</p>
-          <p>3. <strong>Project Settings → API</strong></p>
-          <p>4. Copie <em>Project URL</em> e <em>anon public key</em></p>
+          <p>1. Acesse  → <strong>https://near-rem.github.io/contatos.html</strong></p>
+          <p>2. Entre em contato com o desenvolvedor</p>
+          <p>3. <strong>Personalize e use </strong></p>
+          <p>4. ATENÇÃo <em>75% OFF</em> POR TEMPO <em>LIMITADO</em></p>
         </div>
       </div>
     </div>
@@ -713,7 +713,7 @@ function Recibo({data,rRef,onNova,toast}){
             <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3">
               <Ic n="Wallet" size={22} cls="text-white"/>
             </div>
-            <p className="text-white font-extrabold text-xl tracking-tight">FIADO APP</p>
+            <p className="text-white font-extrabold text-xl tracking-tight">Minero do queijo</p>
             <p className="text-brand-200 text-xs mt-0.5">Comprovante de Venda</p>
           </div>
 
@@ -769,7 +769,7 @@ function Recibo({data,rRef,onNova,toast}){
 
           {/* Rodapé */}
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 text-center">
-            <p className="text-[11px] text-gray-400">Gerado com Fiado App · fiado.app</p>
+            <p className="text-[11px] text-gray-400">Gerado com GRSI App · GRSI.app</p>
             <div className="flex justify-center gap-0.5 mt-2">
               {Array(28).fill(0).map((_,i)=><span key={i} className="w-1 h-1 rounded-full bg-gray-200"/>)}
             </div>
@@ -1109,12 +1109,12 @@ function ConfigSheet({open,onClose,config,onReset}){
     <Sheet open={open} onClose={onClose} title="Configurações">
       <div className="space-y-4">
         <div className="bg-gray-50 rounded-2xl p-4 font-mono text-xs text-gray-500 space-y-2">
-          <p className="font-bold text-gray-700 font-sans mb-1">Supabase conectado</p>
+          <p className="font-bold text-gray-700 font-sans mb-1">conectado</p>
           <p className="break-all">{config.url}</p>
           <p className="truncate">{config.key.slice(0,40)}…</p>
         </div>
         <Btn v="danger" sz="lg" onClick={()=>{if(confirm('Desconectar? Você precisará reconectar.'))onReset();}}>
-          <Ic n="X" size={18}/> Desconectar Supabase
+          <Ic n="X" size={18}/> Desconectar
         </Btn>
         <Btn v="outline" sz="lg" onClick={onClose}>Fechar</Btn>
       </div>
