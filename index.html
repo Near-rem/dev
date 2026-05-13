@@ -656,46 +656,108 @@ function Recibo({data,rRef,onNova,toast}){
   const{v,cliente,carrinho,total,datas,obs}=data;
   const[dl,setDl]=useState(false);
 
+  // ── Gera o canvas do comprovante (pura, sem gerenciar dl) ──────────
   const gerarImg=async()=>{
-    if(!window.html2canvas){toast('Aguarde o carregamento','warn');return;}
+    if(!window.html2canvas){toast('Aguarde o app carregar completamente','warn');return null;}
+    if(!rRef.current){toast('Comprovante não encontrado','error');return null;}
+    try{
+      // scale:2 (não 3) evita crash de memória em WebViews com pouca RAM
+      return await window.html2canvas(rRef.current,{
+        scale:2,
+        backgroundColor:'#ffffff',
+        useCORS:true,
+        allowTaint:true,   // tolerância a recursos cross-origin no WebView
+        logging:false,
+        removeContainer:true,
+      });
+    }catch(e){
+      toast('Erro ao gerar comprovante: '+(e.message||'tente novamente'),'error');
+      return null;
+    }
+  };
+
+  // ── Promisifica toBlob para uso correto com async/await ────────────
+  const canvasToBlob=(canvas)=>new Promise((resolve,reject)=>{
+    try{
+      canvas.toBlob(blob=>{
+        if(blob)resolve(blob);
+        else reject(new Error('toBlob retornou vazio'));
+      },'image/png',0.95);
+    }catch(e){reject(e);}
+  });
+
+  // ── Download: usa createObjectURL (não toDataURL) — estável em WebView ──
+  const baixar=async()=>{
+    if(dl)return;
     setDl(true);
     try{
-      const el=rRef.current;
-      const canvas=await window.html2canvas(el,{scale:3,backgroundColor:'#fff',useCORS:true,logging:false});
-      return canvas;
-    }catch(e){toast('Erro ao gerar imagem','error');return null;}
-    finally{setDl(false);}
+      const canvas=await gerarImg();
+      if(!canvas)return;
+      const blob=await canvasToBlob(canvas);
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download=`recibo-${cliente.nome.replace(/\s+/g,'-').toLowerCase()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      // adia a revogação para o WebView ter tempo de processar o download
+      setTimeout(()=>{URL.revokeObjectURL(url);document.body.removeChild(a);},600);
+      toast('Imagem salva!');
+    }catch(e){
+      toast('Erro ao salvar: '+(e.message||'tente novamente'),'error');
+    }finally{
+      setDl(false);
+    }
   };
 
-  const baixar=async()=>{
-    const c=await gerarImg();
-    if(!c)return;
-    const a=document.createElement('a');
-    a.href=c.toDataURL('image/png');
-    a.download=`recibo-${cliente.nome.replace(/\s+/g,'-').toLowerCase()}.png`;
-    a.click();
-    toast('Imagem salva!');
-  };
-
+  // ── Compartilhar: Web Share API com fallbacks e erros tratados ─────
   const compartilhar=async()=>{
-    const c=await gerarImg();
-    if(!c)return;
-    c.toBlob(async blob=>{
-      if(!blob)return;
-      try{
-        if(navigator.share&&navigator.canShare){
-          const file=new File([blob],'recibo.png',{type:'image/png'});
-          if(navigator.canShare({files:[file]})){
-            await navigator.share({files:[file],title:`Recibo - ${cliente.nome}`,text:`Valor: ${fmt$(total)} | Vence: ${fmtDate(datas.data_vencimento)}`});
-            return;
-          }
+    if(dl)return;
+    setDl(true);
+    const nomeArq=`recibo-${cliente.nome.replace(/\s+/g,'-').toLowerCase()}.png`;
+    const textoShare=`Olá ${cliente.nome}! Segue o comprovante da compra.\nValor: ${fmt$(total)} | Vence: ${fmtDate(datas.data_vencimento)}`;
+    try{
+      const canvas=await gerarImg();
+      if(!canvas)return;
+      const blob=await canvasToBlob(canvas);
+
+      // Tenta Web Share API com arquivo (melhor caminho para WhatsApp mobile)
+      if(typeof navigator.share==='function'){
+        const file=new File([blob],nomeArq,{type:'image/png'});
+        const podeArquivo=typeof navigator.canShare==='function'&&navigator.canShare({files:[file]});
+        if(podeArquivo){
+          await navigator.share({files:[file],title:`Recibo - ${cliente.nome}`,text:textoShare});
+          toast('Compartilhado!');
+          return;
         }
-        // Fallback: download
-        const url=URL.createObjectURL(blob);
-        const a=document.createElement('a');a.href=url;a.download='recibo.png';a.click();
-        URL.revokeObjectURL(url);
-      }catch(e){}
-    },'image/png');
+        // Share sem arquivo (só texto) — segundo nível de fallback
+        try{
+          await navigator.share({title:`Recibo - ${cliente.nome}`,text:textoShare});
+          toast('Texto copiado para compartilhamento!');
+          return;
+        }catch(shareErr){
+          // AbortError = usuário fechou o menu; não é um erro real
+          if(shareErr.name==='AbortError')return;
+          // outros erros: cai no fallback de download abaixo
+        }
+      }
+
+      // Fallback final: download da imagem
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download=nomeArq;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=>{URL.revokeObjectURL(url);document.body.removeChild(a);},600);
+      toast('Imagem salva (compartilhamento indisponível neste dispositivo)');
+    }catch(e){
+      if(e.name!=='AbortError'){
+        toast('Erro ao compartilhar: '+(e.message||'tente novamente'),'error');
+      }
+    }finally{
+      setDl(false);
+    }
   };
 
   const pid=v.id.split('-')[0].toUpperCase();
