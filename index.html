@@ -9,13 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Fiado"/>
 <title>GRSI App</title>
-  <link rel="manifest" href="manifest.json">
-<script>
-  if('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js');
-  }
-</script>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
+ <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -249,13 +243,13 @@ function SetupScreen({onSave}){
           <div className="w-20 h-20 bg-brand-50 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-inner">
             <Ic n="Wallet" size={36} cls="text-brand-600"/>
           </div>
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight"> GRSIApp</h1>
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight"> GRSI App</h1>
           <p className="text-gray-400 text-sm mt-1.5">Gestão Rapida com Sistema Integrado</p>
         </div>
 
         <div className="space-y-4">
           <Inp label="URL DE ACESSO" value={url} onChange={e=>setUrl(e.target.value)} placeholder="Use URL fornecida"/>
-          <Inp label="KEY DE ACESSO)" value={key} onChange={e=>setKey(e.target.value)} placeholder="Use a senha fornecida" type="password"/>
+          <Inp label="SUA KEY DE ACESSO" value={key} onChange={e=>setKey(e.target.value)} placeholder="Use a senha fornecida" type="password"/>
           {err&&<div className="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 text-xs text-red-600">{err}</div>}
           <Btn v="primary" sz="lg" onClick={connect} loading={loading} disabled={loading}>
             {!loading&&<Ic n="Check" size={18}/>}
@@ -268,7 +262,7 @@ function SetupScreen({onSave}){
           <p>1. Acesse  → <strong>https://near-rem.github.io/contatos.html</strong></p>
           <p>2. Entre em contato com o desenvolvedor</p>
           <p>3. <strong>Personalize e use </strong></p>
-          <p>4. ATENÇÃo <em>75% OFF</em> POR TEMPO <em>LIMITADO</em></p>
+          <p>4. ATENÇÃO <em>75% OFF </em> POR TEMPO <em>LIMITADO</em></p>
         </div>
       </div>
     </div>
