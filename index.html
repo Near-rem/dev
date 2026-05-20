@@ -710,28 +710,40 @@ function Recibo({data,rRef,onNova,toast}){
     }
   };
 
-  // ── Compartilhar: Web Share API com Double Action Fallback ────────
+  // ── Compartilhar: Web Share API + Fallback wa.me inteligente ─────
   //
-  //  O html2canvas consome o "transient activation" (user gesture).
-  //  Median.co bloqueia navigator.share com arquivo nesse cenário.
+  //  Nível 1 — navigator.share({ files, text, title })
+  //    Único método que envia imagem + texto simultaneamente no WhatsApp.
   //
-  //  Estratégia:
-  //    1. Tenta navigator.share({ files }) — funciona se o WebView
-  //       preservar o gesture ou se o Median tiver o plugin nativo.
-  //    2. Double Action Fallback (quando share falha por qualquer motivo):
-  //       a) Download automático da imagem → foto cai na galeria
-  //       b) Abre whatsapp:// com o texto da cobrança já preenchido
-  //          → usuário só precisa anexar a foto que acabou de salvar
+  //  Nível 2 — Double Action Fallback (share falhou ou não suportado):
+  //    a) Download automático da imagem  → foto cai na galeria
+  //    b) Toast com instrução ao usuário
+  //    c) wa.me com número do cliente + texto pré-preenchido
+  //       → usuário abre o chat certo e só anexa a foto salva
   //
   const compartilhar=async()=>{
     if(dl)return;
     setDl(true);
-    const nomeArq=`recibo-${cliente.nome.replace(/\s+/g,'-').toLowerCase()}.png`;
-    const textoShare=`Olá ${cliente.nome}! Segue o comprovante da compra.\nValor: ${fmt$(total)} | Vence: ${fmtDate(datas.data_vencimento)}`;
 
-    // Helper: dispara download + abre WhatsApp (Double Action Fallback)
-    const doubleActionFallback=(blob)=>{
-      // Passo A — salva a imagem na galeria do dispositivo
+    // ── Monta mensagem e número do cliente ────────────────────────
+    const textoShare=
+      `Olá ${cliente.nome}! Segue o comprovante da sua compra.\n`+
+      `Valor: ${fmt$(total)} | Vence: ${fmtDate(datas.data_vencimento)}`;
+
+    // Limpa o telefone: remove tudo que não for dígito
+    const digitos=(cliente.telefone||'').replace(/\D/g,'');
+    // Garante código do país (Brasil = 55).
+    // Se já tem 12+ dígitos assume que o código veio junto; senão prefixa 55.
+    const numeroWa=digitos.length>=12?digitos:digitos.length>=10?`55${digitos}`:'';
+    const urlWa=numeroWa
+      ?`https://wa.me/${numeroWa}?text=${encodeURIComponent(textoShare)}`
+      :`https://wa.me/?text=${encodeURIComponent(textoShare)}`; // abre seletor de contato
+
+    const nomeArq=`recibo-${cliente.nome.replace(/\s+/g,'-').toLowerCase()}.png`;
+
+    // ── Helper: download + toast + wa.me (Nível 2) ────────────────
+    const fallback=(blob)=>{
+      // a) Salva imagem na galeria
       try{
         const url=URL.createObjectURL(blob);
         const a=document.createElement('a');
@@ -740,12 +752,11 @@ function Recibo({data,rRef,onNova,toast}){
         a.click();
         setTimeout(()=>{URL.revokeObjectURL(url);document.body.removeChild(a);},800);
       }catch(_){}
-      // Passo B — abre WhatsApp com o texto da cobrança já digitado
-      // 500ms de delay para o download iniciar antes da navegação
-      setTimeout(()=>{
-        window.location.href='whatsapp://send?text='+encodeURIComponent(textoShare);
-      },500);
-      toast('Foto salva! Abrindo WhatsApp...');
+      // b) Instrução clara para o usuário
+      toast('Imagem salva na galeria! Selecione o contato no WhatsApp e envie a foto que acabamos de salvar.');
+      // c) Abre chat do cliente com texto pré-preenchido
+      //    500ms de delay para o download registrar antes de navegar
+      setTimeout(()=>{ window.location.href=urlWa; },500);
     };
 
     try{
@@ -753,7 +764,7 @@ function Recibo({data,rRef,onNova,toast}){
       if(!canvas)return;
       const blob=await canvasToBlob(canvas);
 
-      // ── Tentativa 1: Web Share API com File ───────────────────────
+      // ── Nível 1: Web Share API com arquivo ────────────────────────
       let fileObj=null;
       try{
         fileObj=new File([blob],nomeArq,{type:'image/png',lastModified:Date.now()});
@@ -769,22 +780,21 @@ function Recibo({data,rRef,onNova,toast}){
 
       if(podeArquivo){
         try{
-          // Só files + title — files+text são rejeitados silenciosamente
-          // em vários Android WebViews (incluindo Median.co)
           await navigator.share({
-            files:[fileObj],
-            title:'Comprovante de Venda',
+            files :[fileObj],
+            title :'Comprovante de Venda',
+            text  :textoShare,
           });
           toast('Compartilhado!');
           return;
         }catch(shareErr){
-          if(shareErr.name==='AbortError')return; // usuário fechou o menu
-          // qualquer outro erro → Double Action Fallback
+          if(shareErr.name==='AbortError')return; // usuário fechou o menu — ok
+          // qualquer outro erro → Nível 2
         }
       }
 
-      // ── Tentativa 2: Double Action Fallback ───────────────────────
-      doubleActionFallback(blob);
+      // ── Nível 2: Double Action Fallback ───────────────────────────
+      fallback(blob);
     }catch(e){
       if(e.name!=='AbortError'){
         toast('Erro ao gerar comprovante: '+(e.message||'tente novamente'),'error');
