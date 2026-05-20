@@ -656,16 +656,17 @@ function Recibo({data,rRef,onNova,toast}){
   const{v,cliente,carrinho,total,datas,obs}=data;
   const[dl,setDl]=useState(false);
 
-  // ── Gera o canvas do comprovante — função pura, não toca em dl ──────
+  // ── Gera o canvas do comprovante (pura, sem gerenciar dl) ──────────
   const gerarImg=async()=>{
     if(!window.html2canvas){toast('Aguarde o app carregar completamente','warn');return null;}
     if(!rRef.current){toast('Comprovante não encontrado','error');return null;}
     try{
+      // scale:2 (não 3) evita crash de memória em WebViews com pouca RAM
       return await window.html2canvas(rRef.current,{
-        scale:2,               // scale:3 causa crash de RAM em WebViews
+        scale:2,
         backgroundColor:'#ffffff',
         useCORS:true,
-        allowTaint:true,       // tolerância a recursos cross-origin no WebView
+        allowTaint:true,   // tolerância a recursos cross-origin no WebView
         logging:false,
         removeContainer:true,
       });
@@ -675,17 +676,17 @@ function Recibo({data,rRef,onNova,toast}){
     }
   };
 
-  // ── canvas → Blob via Promise (async/await sem callback hell) ─────
+  // ── Promisifica toBlob para uso correto com async/await ────────────
   const canvasToBlob=(canvas)=>new Promise((resolve,reject)=>{
     try{
-      canvas.toBlob(b=>{
-        if(b)resolve(b);
+      canvas.toBlob(blob=>{
+        if(blob)resolve(blob);
         else reject(new Error('toBlob retornou vazio'));
       },'image/png',0.95);
     }catch(e){reject(e);}
   });
 
-  // ── DOWNLOAD ── blob URL + link click ────────────────────────────
+  // ── Download: usa createObjectURL (não toDataURL) — estável em WebView ──
   const baixar=async()=>{
     if(dl)return;
     setDl(true);
@@ -697,10 +698,10 @@ function Recibo({data,rRef,onNova,toast}){
       const a=document.createElement('a');
       a.href=url;
       a.download=`recibo-${cliente.nome.replace(/\s+/g,'-').toLowerCase()}.png`;
-      a.style.display='none';
       document.body.appendChild(a);
       a.click();
-      setTimeout(()=>{URL.revokeObjectURL(url);document.body.removeChild(a);},800);
+      // adia a revogação para o WebView ter tempo de processar o download
+      setTimeout(()=>{URL.revokeObjectURL(url);document.body.removeChild(a);},600);
       toast('Imagem salva!');
     }catch(e){
       toast('Erro ao salvar: '+(e.message||'tente novamente'),'error');
@@ -709,88 +710,84 @@ function Recibo({data,rRef,onNova,toast}){
     }
   };
 
-  // ── COMPARTILHAR via Web Share API ────────────────────────────────
+  // ── Compartilhar: Web Share API com Double Action Fallback ────────
   //
-  //  Nível 1 → navigator.share({ files, title })
-  //            ↳ Android Intent nativo: abre o seletor de apps (WhatsApp, etc.)
-  //            ↳ IMPORTANTE: NÃO inclui `text` junto com `files`
-  //              — vários Android WebViews rejeitam files+text combinados
+  //  O html2canvas consome o "transient activation" (user gesture).
+  //  Median.co bloqueia navigator.share com arquivo nesse cenário.
   //
-  //  Nível 2 → navigator.share({ title, text })
-  //            ↳ Dispositivo tem Share API mas recusa arquivo
-  //
-  //  Nível 3 → download direto como fallback final
-  //            ↳ Dispositivo não suporta navigator.share
+  //  Estratégia:
+  //    1. Tenta navigator.share({ files }) — funciona se o WebView
+  //       preservar o gesture ou se o Median tiver o plugin nativo.
+  //    2. Double Action Fallback (quando share falha por qualquer motivo):
+  //       a) Download automático da imagem → foto cai na galeria
+  //       b) Abre whatsapp:// com o texto da cobrança já preenchido
+  //          → usuário só precisa anexar a foto que acabou de salvar
   //
   const compartilhar=async()=>{
     if(dl)return;
     setDl(true);
     const nomeArq=`recibo-${cliente.nome.replace(/\s+/g,'-').toLowerCase()}.png`;
-    const textoFallback=`Olá ${cliente.nome}! Segue o comprovante da compra.\nValor: ${fmt$(total)} | Vence: ${fmtDate(datas.data_vencimento)}`;
+    const textoShare=`Olá ${cliente.nome}! Segue o comprovante da compra.\nValor: ${fmt$(total)} | Vence: ${fmtDate(datas.data_vencimento)}`;
+
+    // Helper: dispara download + abre WhatsApp (Double Action Fallback)
+    const doubleActionFallback=(blob)=>{
+      // Passo A — salva a imagem na galeria do dispositivo
+      try{
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url; a.download=nomeArq; a.style.display='none';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(()=>{URL.revokeObjectURL(url);document.body.removeChild(a);},800);
+      }catch(_){}
+      // Passo B — abre WhatsApp com o texto da cobrança já digitado
+      // 500ms de delay para o download iniciar antes da navegação
+      setTimeout(()=>{
+        window.location.href='whatsapp://send?text='+encodeURIComponent(textoShare);
+      },500);
+      toast('Foto salva! Abrindo WhatsApp...');
+    };
+
     try{
       const canvas=await gerarImg();
       if(!canvas)return;
       const blob=await canvasToBlob(canvas);
 
-      // Constrói o File — lastModified melhora compatibilidade em WebViews antigos
-      // Envolvido em try/catch pois alguns Android < 7 não suportam o construtor
+      // ── Tentativa 1: Web Share API com File ───────────────────────
       let fileObj=null;
       try{
         fileObj=new File([blob],nomeArq,{type:'image/png',lastModified:Date.now()});
       }catch(_){}
 
-      // ── Nível 1: share com arquivo (dispara o Intent nativo do Android) ──
-      if(typeof navigator.share==='function'&&fileObj){
-        // canShare pode lançar exceção em contextos restritos — envolve em try/catch
-        let podeArquivo=false;
-        try{
-          podeArquivo=typeof navigator.canShare==='function'&&
-                      navigator.canShare({files:[fileObj]});
-        }catch(_){}
+      let podeArquivo=false;
+      try{
+        podeArquivo=!!fileObj&&
+          typeof navigator.share==='function'&&
+          typeof navigator.canShare==='function'&&
+          navigator.canShare({files:[fileObj]});
+      }catch(_){}
 
-        if(podeArquivo){
-          try{
-            // Só `files` + `title`: sem `text` — combinação files+text
-            // é rejeitada silenciosamente por vários WebViews Android
-            await navigator.share({
-              files:[fileObj],
-              title:'Comprovante de Venda',
-            });
-            toast('Compartilhado!');
-            return;
-          }catch(shareErr){
-            if(shareErr.name==='AbortError')return; // usuário fechou o menu — ok
-            // API aceitou mas falhou ao enviar o arquivo → tenta nível 2
-          }
-        }
-
-        // ── Nível 2: share só texto (sem arquivo) ──
+      if(podeArquivo){
         try{
+          // Só files + title — files+text são rejeitados silenciosamente
+          // em vários Android WebViews (incluindo Median.co)
           await navigator.share({
+            files:[fileObj],
             title:'Comprovante de Venda',
-            text:textoFallback,
           });
-          toast('Texto enviado! Salve a imagem e envie pelo WhatsApp.');
+          toast('Compartilhado!');
           return;
         }catch(shareErr){
-          if(shareErr.name==='AbortError')return;
-          // cai para o download
+          if(shareErr.name==='AbortError')return; // usuário fechou o menu
+          // qualquer outro erro → Double Action Fallback
         }
       }
 
-      // ── Nível 3: download como fallback final ──
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a');
-      a.href=url;
-      a.download=nomeArq;
-      a.style.display='none';
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(()=>{URL.revokeObjectURL(url);document.body.removeChild(a);},800);
-      toast('Imagem salva (compartilhamento indisponível neste dispositivo)');
+      // ── Tentativa 2: Double Action Fallback ───────────────────────
+      doubleActionFallback(blob);
     }catch(e){
       if(e.name!=='AbortError'){
-        toast('Erro ao compartilhar: '+(e.message||'tente novamente'),'error');
+        toast('Erro ao gerar comprovante: '+(e.message||'tente novamente'),'error');
       }
     }finally{
       setDl(false);
