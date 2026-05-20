@@ -46,6 +46,12 @@ tailwind.config = {
   .spin{animation:spin 1s linear infinite}
   .toast-in{animation:toastIn .25s ease forwards}
   .receipt-shadow{box-shadow:0 4px 6px -1px rgba(0,0,0,.07),0 2px 4px -2px rgba(0,0,0,.07),0 0 0 1px rgba(0,0,0,.04)}
+  /* ── Desktop: card flutuante ── */
+  @media(min-width:640px){
+    html{background:linear-gradient(150deg,#14532d 0%,#166534 45%,#1a5c34 100%) fixed}
+    html,body{height:auto!important;min-height:100%;overflow-y:auto!important}
+    #root{min-height:100vh;align-items:center;justify-content:center;padding:1.5rem 0}
+  }
 </style>
 </head>
 <body>
@@ -193,7 +199,7 @@ function Sheet({open,onClose,title,children,full=false}){
   return(
     <div className="fixed inset-0 z-50 flex items-end">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose}/>
-      <div className={`relative bg-white rounded-t-[28px] w-full slide-up ${full?'h-[95vh]':'max-h-[90vh]'} flex flex-col shadow-2xl`}>
+      <div className={`relative bg-white rounded-t-[28px] w-full slide-up ${full?'h-[95vh]':'max-h-[90vh]'} flex flex-col shadow-2xl sm:max-w-lg sm:mx-auto`}>
         <div className="flex-shrink-0 flex items-center justify-between px-5 pt-5 pb-4 border-b border-gray-100">
           <span className="text-base font-bold text-gray-900">{title}</span>
           <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
@@ -335,15 +341,15 @@ function EstoqueTab({api,toast}){
       {/* Summary bar */}
       {!loading&&(
         <div className="bg-white border-b border-gray-100 flex divide-x text-center">
-          <div className="flex-1 py-2.5">
+          <div className="flex-1 py-3 px-2 overflow-hidden">
             <p className="text-lg font-extrabold text-gray-800">{produtos.length}</p>
             <p className="text-[10px] text-gray-400 uppercase tracking-wide">Produtos</p>
           </div>
-          <div className="flex-1 py-2.5">
+          <div className="flex-1 py-3 px-2 overflow-hidden">
             <p className="text-lg font-extrabold text-amber-500">{produtos.filter(p=>p.quantidade<=5&&p.quantidade>0).length}</p>
             <p className="text-[10px] text-gray-400 uppercase tracking-wide">Baixo Est.</p>
           </div>
-          <div className="flex-1 py-2.5">
+          <div className="flex-1 py-3 px-2 overflow-hidden">
             <p className="text-lg font-extrabold text-red-500">{produtos.filter(p=>p.quantidade===0).length}</p>
             <p className="text-[10px] text-gray-400 uppercase tracking-wide">Zerados</p>
           </div>
@@ -351,7 +357,7 @@ function EstoqueTab({api,toast}){
       )}
 
       {/* List */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-2.5 pb-28">
+      <div className="flex-1 overflow-y-auto p-4 space-y-2.5 pb-6">
         {loading?(
           <div className="flex justify-center items-center py-20"><Ic n="Refresh" size={28} cls="text-gray-300 spin"/></div>
         ):F.length===0?(
@@ -361,14 +367,14 @@ function EstoqueTab({api,toast}){
             <p className="text-sm text-gray-300 mt-1">Toque no + para adicionar</p>
           </div>
         ):F.map(p=>(
-          <div key={p.id} className={`bg-white rounded-2xl p-4 flex items-center gap-3 receipt-shadow border ${p.quantidade===0?'border-red-200':p.quantidade<=5?'border-amber-200':'border-transparent'}`}>
+          <div key={p.id} className={`bg-white rounded-2xl px-4 py-4 flex items-center gap-3.5 receipt-shadow border ${p.quantidade===0?'border-red-200':p.quantidade<=5?'border-amber-200':'border-transparent'}`}>
             <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${p.quantidade===0?'bg-red-50':p.quantidade<=5?'bg-amber-50':'bg-brand-50'}`}>
               <Ic n="Package" size={20} cls={p.quantidade===0?'text-red-400':p.quantidade<=5?'text-amber-500':'text-brand-500'}/>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-gray-900 text-sm truncate">{p.nome}</p>
-              <p className="text-brand-600 font-bold text-sm mt-0.5">{fmt$(p.preco)}</p>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${p.quantidade===0?'bg-red-100 text-red-600':p.quantidade<=5?'bg-amber-100 text-amber-600':'bg-gray-100 text-gray-500'}`}>
+              <p className="font-bold text-gray-900 text-[15px] truncate">{p.nome}</p>
+              <p className="text-brand-700 font-extrabold text-base mt-0.5">{fmt$(p.preco)}</p>
+              <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${p.quantidade===0?'bg-red-100 text-red-600':p.quantidade<=5?'bg-amber-100 text-amber-600':'bg-gray-100 text-gray-500'}`}>
                 {p.quantidade===0?'SEM ESTOQUE':p.quantidade<=5?`⚠ ${p.quantidade} un.`:`${p.quantidade} unid.`}
               </span>
             </div>
@@ -385,7 +391,7 @@ function EstoqueTab({api,toast}){
       </div>
 
       {/* FAB */}
-      <button onClick={openAdd} className="fixed bottom-24 right-4 w-14 h-14 bg-brand-600 text-white rounded-2xl shadow-xl shadow-brand-200 flex items-center justify-center z-20 active:scale-95">
+      <button onClick={openAdd} className="fixed bottom-20 right-4 w-14 h-14 bg-brand-600 text-white rounded-2xl shadow-xl shadow-brand-200 flex items-center justify-center z-20 active:scale-95">
         <Ic n="Plus" size={26}/>
       </button>
 
@@ -513,7 +519,7 @@ function VendaTab({api,toast,onVendaCriada}){
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 pb-28 space-y-3">
+      <div className="flex-1 overflow-y-auto p-4 pb-6 space-y-3">
 
         {/* ETAPA 1: CLIENTE */}
         {etapa===1&&(
@@ -650,46 +656,108 @@ function Recibo({data,rRef,onNova,toast}){
   const{v,cliente,carrinho,total,datas,obs}=data;
   const[dl,setDl]=useState(false);
 
+  // ── Gera o canvas do comprovante (pura, sem gerenciar dl) ──────────
   const gerarImg=async()=>{
-    if(!window.html2canvas){toast('Aguarde o carregamento','warn');return;}
+    if(!window.html2canvas){toast('Aguarde o app carregar completamente','warn');return null;}
+    if(!rRef.current){toast('Comprovante não encontrado','error');return null;}
+    try{
+      // scale:2 (não 3) evita crash de memória em WebViews com pouca RAM
+      return await window.html2canvas(rRef.current,{
+        scale:2,
+        backgroundColor:'#ffffff',
+        useCORS:true,
+        allowTaint:true,   // tolerância a recursos cross-origin no WebView
+        logging:false,
+        removeContainer:true,
+      });
+    }catch(e){
+      toast('Erro ao gerar comprovante: '+(e.message||'tente novamente'),'error');
+      return null;
+    }
+  };
+
+  // ── Promisifica toBlob para uso correto com async/await ────────────
+  const canvasToBlob=(canvas)=>new Promise((resolve,reject)=>{
+    try{
+      canvas.toBlob(blob=>{
+        if(blob)resolve(blob);
+        else reject(new Error('toBlob retornou vazio'));
+      },'image/png',0.95);
+    }catch(e){reject(e);}
+  });
+
+  // ── Download: usa createObjectURL (não toDataURL) — estável em WebView ──
+  const baixar=async()=>{
+    if(dl)return;
     setDl(true);
     try{
-      const el=rRef.current;
-      const canvas=await window.html2canvas(el,{scale:3,backgroundColor:'#fff',useCORS:true,logging:false});
-      return canvas;
-    }catch(e){toast('Erro ao gerar imagem','error');return null;}
-    finally{setDl(false);}
+      const canvas=await gerarImg();
+      if(!canvas)return;
+      const blob=await canvasToBlob(canvas);
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download=`recibo-${cliente.nome.replace(/\s+/g,'-').toLowerCase()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      // adia a revogação para o WebView ter tempo de processar o download
+      setTimeout(()=>{URL.revokeObjectURL(url);document.body.removeChild(a);},600);
+      toast('Imagem salva!');
+    }catch(e){
+      toast('Erro ao salvar: '+(e.message||'tente novamente'),'error');
+    }finally{
+      setDl(false);
+    }
   };
 
-  const baixar=async()=>{
-    const c=await gerarImg();
-    if(!c)return;
-    const a=document.createElement('a');
-    a.href=c.toDataURL('image/png');
-    a.download=`recibo-${cliente.nome.replace(/\s+/g,'-').toLowerCase()}.png`;
-    a.click();
-    toast('Imagem salva!');
-  };
-
+  // ── Compartilhar: Web Share API com fallbacks e erros tratados ─────
   const compartilhar=async()=>{
-    const c=await gerarImg();
-    if(!c)return;
-    c.toBlob(async blob=>{
-      if(!blob)return;
-      try{
-        if(navigator.share&&navigator.canShare){
-          const file=new File([blob],'recibo.png',{type:'image/png'});
-          if(navigator.canShare({files:[file]})){
-            await navigator.share({files:[file],title:`Recibo - ${cliente.nome}`,text:`Valor: ${fmt$(total)} | Vence: ${fmtDate(datas.data_vencimento)}`});
-            return;
-          }
+    if(dl)return;
+    setDl(true);
+    const nomeArq=`recibo-${cliente.nome.replace(/\s+/g,'-').toLowerCase()}.png`;
+    const textoShare=`Olá ${cliente.nome}! Segue o comprovante da compra.\nValor: ${fmt$(total)} | Vence: ${fmtDate(datas.data_vencimento)}`;
+    try{
+      const canvas=await gerarImg();
+      if(!canvas)return;
+      const blob=await canvasToBlob(canvas);
+
+      // Tenta Web Share API com arquivo (melhor caminho para WhatsApp mobile)
+      if(typeof navigator.share==='function'){
+        const file=new File([blob],nomeArq,{type:'image/png'});
+        const podeArquivo=typeof navigator.canShare==='function'&&navigator.canShare({files:[file]});
+        if(podeArquivo){
+          await navigator.share({files:[file],title:`Recibo - ${cliente.nome}`,text:textoShare});
+          toast('Compartilhado!');
+          return;
         }
-        // Fallback: download
-        const url=URL.createObjectURL(blob);
-        const a=document.createElement('a');a.href=url;a.download='recibo.png';a.click();
-        URL.revokeObjectURL(url);
-      }catch(e){}
-    },'image/png');
+        // Share sem arquivo (só texto) — segundo nível de fallback
+        try{
+          await navigator.share({title:`Recibo - ${cliente.nome}`,text:textoShare});
+          toast('Texto copiado para compartilhamento!');
+          return;
+        }catch(shareErr){
+          // AbortError = usuário fechou o menu; não é um erro real
+          if(shareErr.name==='AbortError')return;
+          // outros erros: cai no fallback de download abaixo
+        }
+      }
+
+      // Fallback final: download da imagem
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download=nomeArq;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=>{URL.revokeObjectURL(url);document.body.removeChild(a);},600);
+      toast('Imagem salva (compartilhamento indisponível neste dispositivo)');
+    }catch(e){
+      if(e.name!=='AbortError'){
+        toast('Erro ao compartilhar: '+(e.message||'tente novamente'),'error');
+      }
+    }finally{
+      setDl(false);
+    }
   };
 
   const pid=v.id.split('-')[0].toUpperCase();
@@ -705,7 +773,7 @@ function Recibo({data,rRef,onNova,toast}){
         </h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 pb-28">
+      <div className="flex-1 overflow-y-auto p-4 pb-6">
         {/* THE RECEIPT */}
         <div ref={rRef} className="bg-white mx-auto max-w-sm rounded-3xl overflow-hidden receipt-shadow" style={{fontFamily:'Plus Jakarta Sans, sans-serif'}}>
           {/* Cabeçalho */}
@@ -840,8 +908,8 @@ function AlertasTab({api,toast,onAtualizar}){
             <div className="flex items-center gap-2 mb-1">
               <StatusBadge status={v.status} due={v.data_vencimento}/>
             </div>
-            <p className="font-extrabold text-gray-900">{v.cliente_nome}</p>
-            <p className="text-brand-600 font-bold">{fmt$(v.total)}</p>
+            <p className="font-extrabold text-gray-900 text-base">{v.cliente_nome}</p>
+            <p className="text-brand-700 font-extrabold text-xl leading-tight">{fmt$(v.total)}</p>
             <p className="text-xs text-gray-400 mt-0.5">Vence: {fmtDate(v.data_vencimento)}</p>
             {v.observacao&&<p className="text-xs text-gray-400 italic mt-0.5">"{v.observacao}"</p>}
           </div>
@@ -896,7 +964,7 @@ function AlertasTab({api,toast,onAtualizar}){
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-5 pb-24">
+      <div className="flex-1 overflow-y-auto p-4 space-y-5 pb-6">
         {loading?(
           <div className="flex justify-center py-20"><Ic n="Refresh" size={28} cls="text-gray-300 spin"/></div>
         ):vendas.length===0?(
@@ -980,16 +1048,16 @@ function RelatoriosTab({api,toast}){
 
       {/* Cards resumo */}
       <div className="bg-white border-b border-gray-100 grid grid-cols-3 divide-x">
-        <div className="py-3 px-2 text-center">
-          <p className="text-sm font-extrabold text-red-500 leading-tight">{fmt$(totalPendente)}</p>
+        <div className="py-3 px-2 text-center overflow-hidden">
+          <p className="text-xs font-extrabold text-red-500 leading-tight truncate">{fmt$(totalPendente)}</p>
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mt-0.5">A Receber</p>
         </div>
-        <div className="py-3 px-2 text-center">
-          <p className="text-sm font-extrabold text-brand-600 leading-tight">{fmt$(totalPago)}</p>
+        <div className="py-3 px-2 text-center overflow-hidden">
+          <p className="text-xs font-extrabold text-brand-600 leading-tight truncate">{fmt$(totalPago)}</p>
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mt-0.5">Recebido</p>
         </div>
-        <div className="py-3 px-2 text-center">
-          <p className="text-sm font-extrabold text-gray-700 leading-tight">{vendas.length}</p>
+        <div className="py-3 px-2 text-center overflow-hidden">
+          <p className="text-xs font-extrabold text-gray-700 leading-tight">{vendas.length}</p>
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mt-0.5">Vendas</p>
         </div>
       </div>
@@ -1001,7 +1069,7 @@ function RelatoriosTab({api,toast}){
         ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-2.5 pb-24">
+      <div className="flex-1 overflow-y-auto p-4 space-y-2.5 pb-6">
         {loading?(
           <div className="flex justify-center py-20"><Ic n="Refresh" size={28} cls="text-gray-300 spin"/></div>
         ):filtradas.length===0?(
@@ -1016,8 +1084,8 @@ function RelatoriosTab({api,toast}){
                 <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                   <StatusBadge status={v.status} due={v.data_vencimento}/>
                 </div>
-                <p className="font-extrabold text-gray-900">{v.cliente_nome}</p>
-                <p className="text-brand-600 font-bold">{fmt$(v.total)}</p>
+                <p className="font-extrabold text-gray-900 text-base">{v.cliente_nome}</p>
+                <p className="text-brand-700 font-extrabold text-xl leading-tight">{fmt$(v.total)}</p>
                 <p className="text-xs text-gray-400 mt-0.5">
                   Venda: {fmtDate(v.data_venda)} · Vence: {fmtDate(v.data_vencimento)}
                 </p>
@@ -1084,7 +1152,7 @@ function NavBar({aba,setAba,alertas}){
     {id:'relatorios',icon:'Chart',label:'Relatórios'},
   ];
   return(
-    <nav className="fixed bottom-0 inset-x-0 bg-white border-t border-gray-100 z-30 pb-safe">
+    <nav className="flex-shrink-0 bg-white border-t border-gray-100 z-30 pb-safe">
       <div className="flex max-w-lg mx-auto">
         {tabs.map(t=>(
           <button key={t.id} onClick={()=>setAba(t.id)} className={`flex-1 flex flex-col items-center py-2.5 gap-1 relative transition-colors ${aba===t.id?'text-brand-600':'text-gray-400'}`}>
@@ -1164,7 +1232,7 @@ function App(){
   if(!config)return<><Toasts list={toasts}/><SetupScreen onSave={saveConfig}/></>;
 
   return(
-    <div className="h-full flex flex-col max-w-lg mx-auto bg-gray-50 relative">
+    <div className="h-screen flex flex-col max-w-lg mx-auto w-full bg-gray-50 relative sm:h-[calc(100vh-3rem)] sm:rounded-3xl sm:overflow-hidden sm:shadow-[0_24px_64px_rgba(0,0,0,0.35)]">
       <Toasts list={toasts}/>
 
       {/* Botão settings (canto) */}
