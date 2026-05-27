@@ -725,11 +725,16 @@ function Recibo({data,rRef,onNova,toast}){
     if(dl)return;
     setDl(true);
 
-    // ── Monta mensagem e número do cliente ────────────────────────
-    const textoShare=
-      `Olá ${cliente.nome}! Segue o comprovante da sua compra.\n`+
-      `Valor: ${fmt$(total)} | Vence: ${fmtDate(datas.data_vencimento)}`;
-
+   // ── Monta mensagem e número do cliente ────────────────────────
+const textoShare = 
+  `Olá ${cliente.nome}! Segue o comprovante da sua compra.\n\n` +
+  `Valor: ${fmt$(total)}\n` +
+  `Data de vencimento: ${fmtDate(datas.data_vencimento)}\n\n` +
+  `--- DADOS PARA PAGAMENTO ---\n` +
+  `Chave Pix: 21994962805\n\n` +
+  `Nome: Paulo Renato Crema Miranda\n` +
+  `Banco: Bradesco\n` +
+  `Para confirmação do pagamento, mande o comprovante aqui mesmo.`;
     // Limpa o telefone: remove tudo que não for dígito
     const digitos=(cliente.telefone||'').replace(/\D/g,'');
     // Garante código do país (Brasil = 55).
